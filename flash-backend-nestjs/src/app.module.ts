@@ -17,6 +17,7 @@ import { BackupModule } from './modules/backup/backup.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { RolesModule } from './modules/roles/roles.module';
 
 // Business modules
 import { EmployeesModule } from './modules/employees/employees.module';
@@ -35,6 +36,7 @@ import { GeneralInventoryModule } from './modules/general-inventory/general-inve
 import { RestrictedInventoryModule } from './modules/restricted-inventory/restricted-inventory.module';
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { CompanySettingsModule } from './modules/company-settings/company-settings.module';
+import { ClientPortalModule } from './modules/client-portal/client-portal.module';
 
 @Module({
   imports: [
@@ -63,6 +65,7 @@ import { CompanySettingsModule } from './modules/company-settings/company-settin
     AuthModule,
     UsersModule,
     AdminModule,
+    RolesModule,
 
     // Business modules
     EmployeesModule,
@@ -82,6 +85,7 @@ import { CompanySettingsModule } from './modules/company-settings/company-settin
     RestrictedInventoryModule,
     UploadsModule,
     CompanySettingsModule,
+    ClientPortalModule,
   ],
 })
 export class AppModule {}

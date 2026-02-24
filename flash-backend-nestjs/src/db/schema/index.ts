@@ -7,3 +7,4 @@ export * from './finance';
 export * from './clients';
 export * from './inventory';
 export * from './company-settings';
+export { client_complaints } from './clients';

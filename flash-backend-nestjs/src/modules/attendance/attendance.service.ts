@@ -486,11 +486,26 @@ export class AttendanceService {
       
       // Autoritative Pakistan Timezone Helpers
       const now = new Date();
-      const dateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Karachi' }).format(now);
+      const currentDateStr = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Karachi' }).format(now);
       const timeStr = new Intl.DateTimeFormat('en-GB', { 
           timeZone: 'Asia/Karachi', 
           hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false 
       }).format(now);
+
+      // Allow using date from client if it's for check_out/overtime_out and within 24 hours of current date (overnight shifts)
+      let dateStr = currentDateStr;
+      if ((normalizedType === 'check_out' || normalizedType === 'overtime_out') && date) {
+        const providedDate = new Date(date);
+        const currentDate = new Date(currentDateStr);
+        const timeDiff = Math.abs(currentDate.getTime() - providedDate.getTime());
+        const daysDiff = timeDiff / (1000 * 60 * 60 * 24);
+        
+        // If provided date is yesterday and we're in early morning (within 24 hours), use it for check-out
+        if (daysDiff <= 1) {
+          dateStr = date;
+          console.log(`[markSelf] Using client-provided date ${date} for ${normalizedType} (overnight shift)`);
+        }
+      }
 
       console.log(`[markSelf] Processing ${normalizedType} for ID=${employeeId}, Date=${dateStr}, Time=${timeStr}`);
 

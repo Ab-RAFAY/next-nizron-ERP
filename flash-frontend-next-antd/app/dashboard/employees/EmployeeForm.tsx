@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useMemo } from 'react';
 import { CameraOutlined, HolderOutlined, EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import { Form, Input, Button, Row, Col, DatePicker, InputNumber, Select, Divider, Upload, Modal, Space, Tag, message } from 'antd';
-import { employeeApi } from '@/lib/api';
+import { employeeApi, rolesApi } from '@/lib/api';
 import dayjs from 'dayjs';
 
 
@@ -11,8 +11,8 @@ const { TextArea } = Input;
 
 interface EmployeeFormProps {
   initialValues?: Record<string, unknown> | null;
-  onSubmit: (values: Record<string, unknown>) => void;
-  onCancel: () => void;
+  onSubmitAction: (values: Record<string, unknown>) => void;
+  onCancelAction: () => void;
 }
 
 const DOCUMENT_CATEGORIES = [
@@ -52,7 +52,9 @@ const DEFAULT_FIELDS: FieldConfig[] = [
   { id: 'introduced_by', label: 'Introduced By', name: 'introduced_by', span: 6, component: 'input', section: 'Enrolment Details' },
 
   { id: 'enrolled_as', label: 'Enrolled As', name: 'enrolled_as', span: 6, component: 'input', placeholder: 'Security Guard', section: 'Enrolment Details' },
-  { id: 'deployed_at', label: 'Deployed At', name: 'deployed_at', span: 12, component: 'input', placeholder: 'Site/Location', section: 'Enrolment Details' },
+  { id: 'role_id', label: 'Assign Role', name: 'role_id', span: 6, component: 'select', placeholder: 'Select Role', section: 'Enrolment Details', options: [] },
+  { id: 'role', label: 'Legacy Role', name: 'role', span: 6, component: 'input', placeholder: 'Enter Role', section: 'Enrolment Details' },
+  { id: 'deployed_at', label: 'Deployed At', name: 'deployed_at', span: 6, component: 'input', placeholder: 'Site/Location', section: 'Enrolment Details' },
 
   { id: 'pay_rs', label: 'Pay (Rs)', name: 'pay_rs', span: 6, component: 'inputnumber', placeholder: '25000', section: 'Enrolment Details' },
   { id: 'bdm', label: 'BDM', name: 'bdm', span: 6, component: 'input', section: 'Enrolment Details' },
@@ -324,13 +326,25 @@ function StatusManagementModal({ visible, onClose, onRefresh }: { visible: boole
 
 export default function EmployeeForm({
   initialValues,
-  onSubmit,
-  onCancel,
+  onSubmitAction,
+  onCancelAction,
 }: EmployeeFormProps) {
   const [form] = Form.useForm();
   const profilePhotoFileRef = useRef<any>(null);
   const [personStatuses, setPersonStatuses] = useState<any[]>([]);
+  const [roles, setRoles] = useState<any[]>([]);
   const [isStatusModalVisible, setIsStatusModalVisible] = useState(false);
+
+  const loadRoles = async () => {
+    try {
+      const response = await rolesApi.getAll();
+      if (response.data) {
+        setRoles(response.data);
+      }
+    } catch (error) {
+      console.error('Failed to load roles:', error);
+    }
+  };
 
   const loadPersonStatuses = async () => {
     try {
@@ -345,6 +359,7 @@ export default function EmployeeForm({
 
   useEffect(() => {
     loadPersonStatuses();
+    loadRoles();
   }, []);
 
   const handleProfilePictureChange = ({ fileList }: any) => {
@@ -372,7 +387,7 @@ export default function EmployeeForm({
       formattedValues._profilePhotoFile = profilePhotoFileRef.current;
     }
 
-    onSubmit(formattedValues);
+    onSubmitAction(formattedValues);
   };
 
   const getInitialValues = () => {
@@ -426,6 +441,9 @@ export default function EmployeeForm({
       if (field.id === 'person_status') {
         fieldConfig.options = personStatuses.map((s: any) => ({ label: s.name, value: s.name }));
       }
+      if (field.id === 'role_id') {
+        fieldConfig.options = roles.map((r: any) => ({ label: r.name, value: r.id }));
+      }
 
       const elements = [];
       if (field.section && field.section !== currentSection) {
@@ -446,7 +464,7 @@ export default function EmployeeForm({
       );
       return elements;
     });
-  }, [personStatuses]);
+  }, [personStatuses, roles]);
 
   return (
     <Form
@@ -462,7 +480,7 @@ export default function EmployeeForm({
 
       <div className="flex justify-end items-center mt-4 pt-4 border-t sticky bottom-0 bg-white">
         <div className="flex gap-2">
-          <Button onClick={onCancel}>Cancel</Button>
+          <Button onClick={onCancelAction}>Cancel</Button>
           <Button type="primary" htmlType="submit">
             {initialValues ? 'Update Employee' : 'Create Employee'}
           </Button>

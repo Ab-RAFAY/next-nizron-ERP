@@ -25,6 +25,7 @@ export const clients = pgTable('clients', {
   industry: text('industry'),
   industry_id: integer('industry_id').references(() => industries.id),
   status: text('status').default('active'),
+  password: text('password'),
   notes: text('notes'),
   created_at: timestamp('created_at').defaultNow(),
 });
@@ -107,4 +108,21 @@ export const site_guard_assignments = pgTable('site_guard_assignments', {
   status: text('status').default('active'), // active, ejected, completed
   notes: text('notes'),
   created_at: timestamp('created_at').defaultNow(),
+});
+
+export const client_complaints = pgTable('client_complaints', {
+  id: serial('id').primaryKey(),
+  client_id: integer('client_id')
+    .notNull()
+    .references(() => clients.id, { onDelete: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description').notNull(),
+  category: text('category').default('general'), // general, guard_performance, site_issue, billing, service_quality
+  status: text('status').default('open'), // open, in_progress, resolved, closed
+  priority: text('priority').default('medium'), // low, medium, high, urgent
+  assigned_to: text('assigned_to'),
+  resolution: text('resolution'),
+  admin_feedback: text('admin_feedback'),
+  created_at: timestamp('created_at').defaultNow(),
+  updated_at: timestamp('updated_at').defaultNow(),
 });

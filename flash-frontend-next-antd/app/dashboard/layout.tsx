@@ -21,6 +21,7 @@ import {
   ClockCircleOutlined,
   FileDoneOutlined,
   AppstoreOutlined,
+  BulbOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
@@ -58,6 +59,7 @@ export default function DashboardLayout({
       key: 'hr',
       icon: <TeamOutlined />,
       label: 'Human Resources',
+      hidden: !user.is_superuser && !user.permissions?.includes('hr'),
       children: [
         {
           key: '/dashboard/employees',
@@ -85,6 +87,7 @@ export default function DashboardLayout({
       key: 'fleet',
       icon: <CarOutlined />,
       label: 'Fleet Management',
+      hidden: !user.is_superuser && !user.permissions?.includes('fleet'),
       children: [
         {
           key: '/dashboard/vehicles',
@@ -112,11 +115,17 @@ export default function DashboardLayout({
       key: 'operations',
       icon: <AppstoreOutlined />,
       label: 'Operations',
+      hidden: !user.is_superuser && !user.permissions?.includes('operations'),
       children: [
         {
           key: '/dashboard/clients',
           icon: <ShopOutlined />,
           label: 'Clients',
+        },
+        {
+          key: '/dashboard/clients/complaints',
+          icon: <BulbOutlined />,
+          label: 'Complaints',
         },
         {
           key: '/dashboard/finance',
@@ -134,6 +143,7 @@ export default function DashboardLayout({
       key: 'inventory',
       icon: <SafetyOutlined />,
       label: 'Inventory',
+      hidden: !user.is_superuser && !user.permissions?.includes('inventory'),
       children: [
         {
           key: '/dashboard/inventory/general',
@@ -151,13 +161,22 @@ export default function DashboardLayout({
       key: '/dashboard/settings',
       icon: <SettingOutlined />,
       label: 'Settings',
+      hidden: !user.is_superuser && !user.permissions?.includes('administration'),
     },
     {
-      key: '/dashboard/administration/roles',
+      key: 'administration',
       icon: <SettingOutlined />,
       label: 'Administration',
+      hidden: !user.is_superuser && !user.permissions?.includes('administration'),
+      children: [
+        {
+          key: '/dashboard/administration/roles',
+          icon: <SafetyOutlined />,
+          label: 'Roles & Permissions',
+        },
+      ],
     },
-  ];
+  ].filter(item => !(item as any).hidden);
 
   const userMenuItems: MenuProps['items'] = [
     {

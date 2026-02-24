@@ -33,14 +33,35 @@ export class UsersService {
   }
 
   async findOne(id: number) {
-    const [user] = await this.db
-      .select()
-      .from(schema.users)
-      .where(eq(schema.users.id, id));
+    const user = await this.db.query.users.findFirst({
+      where: eq(schema.users.id, id),
+    });
+
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    return { ...user, is_superuser: user.is_admin };
+
+    // Get user roles and permissions
+    const userRoles = await this.db
+      .select({
+        role: schema.roles,
+      })
+      .from(schema.users_to_roles)
+      .innerJoin(schema.roles, eq(schema.users_to_roles.role_id, schema.roles.id))
+      .where(eq(schema.users_to_roles.user_id, id));
+
+    const permissions = new Set<string>();
+    userRoles.forEach((ur) => {
+      const rolePerms = ur.role.permissions as string[] || [];
+      rolePerms.forEach((p) => permissions.add(p));
+    });
+
+    return { 
+      ...user, 
+      is_superuser: user.is_admin,
+      roles: userRoles.map(ur => ur.role.name),
+      permissions: Array.from(permissions),
+    };
   }
 
   async findByEmail(email: string) {
@@ -219,5 +240,12 @@ export class UsersService {
       .select()
       .from(schema.employees)
       .where(eq(schema.employees.employee_id, employeeId));
+  }
+
+  async findClientById(id: number) {
+    return this.db
+      .select()
+      .from(schema.clients)
+      .where(eq(schema.clients.id, id));
   }
 }

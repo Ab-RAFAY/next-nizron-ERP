@@ -530,5 +530,33 @@ export class ClientManagementService {
     return { message: 'Deleted' };
   }
 
+  // Complaints
+  async listAllComplaints() {
+    return this.db
+      .select()
+      .from(schema.client_complaints)
+      .orderBy(desc(schema.client_complaints.id));
+  }
 
+  async updateComplaint(id: number, dto: any) {
+    const data: any = { ...dto, updated_at: new Date() };
+
+    await this.db
+      .update(schema.client_complaints)
+      .set(data)
+      .where(eq(schema.client_complaints.id, id));
+
+    const [updated] = await this.db
+      .select()
+      .from(schema.client_complaints)
+      .where(eq(schema.client_complaints.id, id));
+    return updated;
+  }
+
+  async deleteComplaint(id: number) {
+    await this.db
+      .delete(schema.client_complaints)
+      .where(eq(schema.client_complaints.id, id));
+    return { message: 'Deleted' };
+  }
 }

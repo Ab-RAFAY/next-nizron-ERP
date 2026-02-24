@@ -8,6 +8,8 @@ interface User {
   id: string;
   email: string;
   name?: string;
+  permissions?: string[];
+  is_superuser?: boolean;
 }
 
 interface AuthContextType {
@@ -47,7 +49,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (email: string, password: string) => {
     try {
       const response = await authApi.login(email, password);
-      
+
       if (response.error) {
         console.error('Login error:', response.error);
         return { success: false, error: response.error };
@@ -60,31 +62,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return { success: false, error: 'No response data received' };
       }
       const { access_token } = data;
-      
+
       if (!access_token) {
         console.error('No access token in response:', response.data);
         return { success: false, error: 'No access token received' };
       }
-      
+
       localStorage.setItem('token', access_token);
-      
+
       // Fetch user data after login
       const userResponse = await authApi.getMe();
       console.log('User response:', userResponse);
-      
+
       if (userResponse.error) {
         console.error('Failed to fetch user:', userResponse.error);
         return { success: false, error: userResponse.error };
       }
-      
+
       if (userResponse.data) {
         const userData = userResponse.data as User;
         localStorage.setItem('user', JSON.stringify(userData));
         setUser(userData);
       }
-      
+
       router.push('/dashboard');
-      
+
       return { success: true };
     } catch (_error) {
       return { success: false, error: 'An unexpected error occurred' };

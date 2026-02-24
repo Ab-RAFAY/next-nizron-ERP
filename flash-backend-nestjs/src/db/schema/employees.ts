@@ -87,6 +87,7 @@ export const employees = pgTable('employees', {
   // Employment Details
   department: text('department'),
   designation: text('designation'),
+  role: text('role'),
   enrolled_as: text('enrolled_as'),
   employment_type: text('employment_type'),
   shift_type: text('shift_type'),
@@ -202,6 +203,7 @@ export const employees = pgTable('employees', {
   created_at: timestamp('created_at').defaultNow(),
   updated_at: timestamp('updated_at').defaultNow(),
   photo: text('photo'),
+  role_id: integer('role_id'),
 });
 
 /**

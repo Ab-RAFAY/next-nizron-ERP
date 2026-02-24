@@ -164,7 +164,8 @@ async function seed() {
             category: 'Supplies',
             name: faker.commerce.productName(),
             unit_name: 'pcs',
-            quantity_on_hand: 50
+            quantity_on_hand: 50,
+            status: 'active'
         });
         await db.insert(schema.generalInventoryItems).values(vals).catch(e => console.error('GenInv fail:', e.message));
 
@@ -178,11 +179,29 @@ async function seed() {
     }
 
     const restrictedItems = await db.select().from(schema.restrictedInventoryItems);
-    if (restrictedItems.length > 0) {
+    if (restrictedItems.length === 0) {
+        console.log('Seeding restricted items...');
+        const riCols = await getColumns('restricted_inventory_items');
+        for (let i = 0; i < 5; i++) {
+            const itemCode = `RI-${faker.string.alphanumeric(5).toUpperCase()}`;
+            const vals = filterValues('restricted_inventory_items', riCols, {
+                item_code: itemCode,
+                category: 'Equipment',
+                name: faker.commerce.productName(),
+                unit_name: 'pcs',
+                quantity_on_hand: 10,
+                status: 'active'
+            });
+            await db.insert(schema.restrictedInventoryItems).values(vals).catch(e => console.error('RestrictedInv fail:', e.message));
+        }
+    }
+
+    const allRestricted = await db.select().from(schema.restrictedInventoryItems);
+    if (allRestricted.length > 0) {
         console.log('Seeding restricted serial units and transactions...');
         const rsuCols = await getColumns('restricted_serial_units');
         const rtCols = await getColumns('restricted_transactions');
-        for (const item of restrictedItems) {
+        for (const item of allRestricted) {
             // Seed serial units
             for (let j = 0; j < 5; j++) {
                 const sn = `SN-${faker.string.alphanumeric(10).toUpperCase()}`;
@@ -211,28 +230,56 @@ async function seed() {
     // 9. Vehicles
     const allVehicles = await db.select().from(schema.vehicles);
     if (allVehicles.length > 0) {
-        console.log('Seeding fuel and maintenance...');
+        console.log('Seeding vehicle data...');
         const feCols = await getColumns('fuel_entries');
         const vmCols = await getColumns('vehicle_maintenance');
-        for (let i = 0; i < 10; i++) {
+        const vaCols = await getColumns('vehicle_assignments');
+        
+        for (let i = 0; i < 15; i++) {
             const v = faker.helpers.arrayElement(allVehicles);
             
+            // Fuel
             const feVals = filterValues('fuel_entries', feCols, {
                 vehicle_id: v.vehicle_id,
                 entry_date: faker.date.recent().toISOString(),
                 liters: 20,
                 total_cost: 5000,
+                price_per_liter: 250,
+                vendor: 'PSO',
                 fuel_type: 'Diesel'
             });
             await db.insert(schema.fuelEntries).values(feVals).catch(e => console.error('Fuel fail:', e.message));
 
+            // Maintenance
             const vmVals = filterValues('vehicle_maintenance', vmCols, {
                 vehicle_id: v.vehicle_id,
                 maintenance_date: faker.date.recent().toISOString(),
+                maintenance_type: faker.helpers.arrayElement(['Routine', 'Repair', 'Inspection']),
                 description: 'Service',
+                cost: faker.number.int({ min: 500, max: 20000 }),
+                vendor: faker.company.name(),
                 status: 'completed'
             });
             await db.insert(schema.vehicleMaintenance).values(vmVals).catch(e => console.error('Maint fail:', e.message));
+
+            // Assignments
+            if (allEmployees.length > 0) {
+                const emp = faker.helpers.arrayElement(allEmployees);
+                const vaVals = filterValues('vehicle_assignments', vaCols, {
+                    vehicle_id: v.vehicle_id,
+                    employee_id: emp.employee_id,
+                    from_date: faker.date.recent().toISOString(),
+                    to_date: faker.date.soon().toISOString(),
+                    assignment_date: faker.date.recent().toISOString(),
+                    route: 'Karachi - Lahore',
+                    location: 'North Office',
+                    status: 'active',
+                    purpose: 'Transport',
+                    distance_km: 150,
+                    cost: 3000
+                });
+                await db.insert(schema.vehicleAssignments).values(vaVals).catch(e => console.error('Assign fail:', e.message));
+            }
         }
     }
 

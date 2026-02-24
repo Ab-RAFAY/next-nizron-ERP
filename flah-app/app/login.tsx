@@ -12,6 +12,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
+  const [isClient, setIsClient] = useState(false);
   const router = useRouter();
 
   const formatCNIC = (text: string) => {
@@ -26,6 +27,10 @@ export default function LoginScreen() {
   };
 
   const handleIdentifierChange = (text: string) => {
+    if (isClient) {
+      setFssNo(text);
+      return;
+    }
     if (text.length > 5 || (fssNo.includes('-') && text.length > 4)) {
       setFssNo(formatCNIC(text));
     } else {
@@ -35,26 +40,37 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!fssNo || !password) {
-      Alert.alert('Required Fields', 'Please enter your FSS Number or CNIC and password.');
+      Alert.alert('Required Fields', `Please enter your ${isClient ? 'email' : 'FSS Number or CNIC'} and password.`);
       return;
     }
 
     setLoading(true);
     try {
-      const res = await fetch(`${CONFIG.API_BASE_URL}/auth/employee-login`, {
+      const endpoint = isClient ? '/auth/client-login' : '/auth/employee-login';
+      const body = isClient ? { email: fssNo, password } : { fss_no: fssNo, password };
+
+      const res = await fetch(`${CONFIG.API_BASE_URL}${endpoint}`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fss_no: fssNo, password }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (res.ok && data.token && data.employee_id) {
-        await AsyncStorage.setItem('token', data.token);
-        await AsyncStorage.setItem('employee_id', data.employee_id);
-        await AsyncStorage.setItem('full_name', data.full_name || '');
-        await AsyncStorage.setItem('fss_no', data.fss_no || '');
 
-        // Show splash and delay navigation
-        setShowSplash(true);
+      if (res.ok && (data.token || data.access_token)) {
+        const token = data.token || data.access_token;
+        await AsyncStorage.setItem('token', token);
+        await AsyncStorage.setItem('user_type', isClient ? 'client' : 'employee');
+
+        if (isClient) {
+          await AsyncStorage.setItem('client_id', String(data.client_id));
+          await AsyncStorage.setItem('full_name', data.name || '');
+          setShowSplash(true);
+        } else {
+          await AsyncStorage.setItem('employee_id', data.employee_id);
+          await AsyncStorage.setItem('full_name', data.full_name || '');
+          await AsyncStorage.setItem('fss_no', data.fss_no || '');
+          setShowSplash(true);
+        }
       } else {
         Alert.alert('Login Failed', data.message || 'Invalid credentials');
       }
@@ -72,7 +88,7 @@ export default function LoginScreen() {
     >
       <SplashOverlay
         visible={showSplash}
-        onFinish={() => router.replace('/(tabs)')}
+        onFinish={() => router.replace(isClient ? '/(client-tabs)' : '/(tabs)')}
       />
       <SafeAreaView style={{ flex: 1, backgroundColor: '#eff6ff' }} edges={['top', 'left', 'right']}>
         <View style={styles.backgroundGradient}>
@@ -86,23 +102,40 @@ export default function LoginScreen() {
                 />
               </View>
               <Text style={styles.welcomeTitle}>Nizron Tech ERP</Text>
-              <Text style={styles.welcomeSubtitle}>Employee Portal</Text>
+              <Text style={styles.welcomeSubtitle}>{isClient ? 'Client Portal' : 'Employee Portal'}</Text>
             </View>
 
             <View style={styles.loginCard}>
-              <Text style={styles.cardTitle}>Sign In</Text>
-              <Text style={styles.inputHint}>Enter your credentials to manage your attendance and tasks.</Text>
+              <View style={styles.tabContainer}>
+                <TouchableOpacity
+                  style={[styles.tab, !isClient && styles.activeTab]}
+                  onPress={() => { setIsClient(false); setFssNo(''); }}
+                >
+                  <Text style={[styles.tabText, !isClient && styles.activeTabText]}>Employee</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.tab, isClient && styles.activeTab]}
+                  onPress={() => { setIsClient(true); setFssNo(''); }}
+                >
+                  <Text style={[styles.tabText, isClient && styles.activeTabText]}>Client</Text>
+                </TouchableOpacity>
+              </View>
+
+              <Text style={styles.cardTitle}>{isClient ? 'Client Sign In' : 'Sign In'}</Text>
+              <Text style={styles.inputHint}>
+                {isClient ? 'View your sites, guards and attendance data.' : 'Enter your credentials to manage your attendance and tasks.'}
+              </Text>
 
               <View style={styles.inputGroup}>
-                <Text style={styles.label}>FSS NUMBER / CNIC</Text>
+                <Text style={styles.label}>{isClient ? 'EMAIL ADDRESS' : 'FSS NUMBER / CNIC'}</Text>
                 <TextInput
                   style={styles.input}
-                  placeholder="000 or 1111-42347771-1"
+                  placeholder={isClient ? "email@example.com" : "000 or 1111-42347771-1"}
                   placeholderTextColor="#94a3b8"
                   value={fssNo}
                   onChangeText={handleIdentifierChange}
                   autoCapitalize="none"
-                  keyboardType="numeric"
+                  keyboardType={isClient ? "email-address" : "numeric"}
                 />
               </View>
 
@@ -130,8 +163,6 @@ export default function LoginScreen() {
                   <Text style={styles.loginButtonText}>CONTINUE</Text>
                 )}
               </TouchableOpacity>
-
-
             </View>
 
             <View style={styles.footerSection}>
@@ -211,6 +242,35 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.08,
     shadowRadius: 30,
     elevation: 4,
+  },
+  tabContainer: {
+    flexDirection: 'row',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 12,
+    padding: 4,
+    marginBottom: 24,
+  },
+  tab: {
+    flex: 1,
+    paddingVertical: 8,
+    alignItems: 'center',
+    borderRadius: 8,
+  },
+  activeTab: {
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  tabText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#64748b',
+  },
+  activeTabText: {
+    color: '#1e293b',
   },
   cardTitle: {
     fontSize: 22,

@@ -8,7 +8,7 @@ export interface JwtPayload {
   email?: string;
   fss_no?: string;
   is_superuser?: boolean;
-  type?: 'user' | 'employee';
+  type?: 'user' | 'employee' | 'client';
 }
 
 @Injectable()
@@ -74,6 +74,14 @@ export class AuthService {
       return { ...employee, sub: employee.employee_id, type: 'employee' };
     }
 
+    if (payload.type === 'client') {
+      const [client] = await this.usersService.findClientById(payload.sub);
+      if (!client) {
+        throw new UnauthorizedException('Client account not found');
+      }
+      return { ...client, sub: client.id, type: 'client' };
+    }
+
     const user = await this.usersService.findOne(payload.sub);
     if (!user || !(user as any).is_active) {
       throw new UnauthorizedException();
@@ -86,6 +94,11 @@ export class AuthService {
       const [employee] = await this.usersService.findEmployeeById(payload.sub);
       if (!employee) throw new UnauthorizedException('Employee not found');
       return employee;
+    }
+    if (payload.type === 'client') {
+      const [client] = await this.usersService.findClientById(payload.sub);
+      if (!client) throw new UnauthorizedException('Client not found');
+      return client;
     }
     return this.usersService.findOne(payload.sub);
   }

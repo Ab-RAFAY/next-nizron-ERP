@@ -84,6 +84,13 @@ class ApiClient {
     });
   }
 
+  async patch<T>(endpoint: string, body: unknown): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: "PATCH",
+      body: JSON.stringify(body),
+    });
+  }
+
   async delete<T>(endpoint: string, body?: unknown): Promise<ApiResponse<T>> {
     const options: RequestInit = { method: "DELETE" };
     if (body) {
@@ -795,6 +802,14 @@ export const usersApi = {
   delete: (id: number) => api.delete(`/api/users/${id}`),
 };
 
+export const rolesApi = {
+  getAll: () => api.get<any[]>("/api/roles"),
+  getOne: (id: number) => api.get<any>(`/api/roles/${id}`),
+  create: (data: any) => api.post<any>("/api/roles", data),
+  update: (id: number, data: any) => api.patch<any>(`/api/roles/${id}`, data),
+  remove: (id: number) => api.delete(`/api/roles/${id}`),
+};
+
 export const companySettingsApi = {
   get: () => api.get('/api/company-settings'),
   update: (data: any) => api.uploadFile('/api/company-settings', data, 'PUT'),
@@ -802,5 +817,11 @@ export const companySettingsApi = {
 
 export const commonApi = {
   upload: (formData: FormData) => api.uploadFile('/api/uploads', formData),
+};
+
+export const complaintsApi = {
+  getAll: () => api.get<any[]>('/api/client-management/complaints'),
+  update: (id: number, data: any) => api.put<any>(`/api/client-management/complaints/${id}`, data),
+  delete: (id: number) => api.delete<any>(`/api/client-management/complaints/${id}`),
 };
 

@@ -33,15 +33,17 @@ export class EmployeesService {
   async findAll(query: EmployeeQueryDto) {
     const skip = Number(query.skip) || 0;
     const limit = Number(query.limit) || 100;
-    const { search, status, unit, rank, served_in, person_status, deployed_at, with_total, fss_no, full_name, cnic } = query;
+    const { search, status, unit, rank, role, served_in, person_status, deployed_at, with_total, fss_no, full_name, cnic } = query;
 
     const filters: SQL[] = [];
 
     if (status) filters.push(eq(schema.employees.status, status));
     if (unit) filters.push(eq(schema.employees.unit, unit));
     if (rank) filters.push(eq(schema.employees.rank, rank));
+    if (role) filters.push(eq(schema.employees.role, role));
     if (served_in) filters.push(eq(schema.employees.served_in, served_in));
     if (person_status) filters.push(eq(schema.employees.person_status, person_status));
+    if (query.role_id) filters.push(eq(schema.employees.role_id, query.role_id));
 
     if (deployed_at)
       filters.push(eq(schema.employees.deployed_at, deployed_at));
@@ -101,12 +103,24 @@ export class EmployeesService {
     }
 
     const employees = await (
-      this.db.select().from(schema.employees).where(finalFilter) as any
+      this.db
+        .select({
+          employee: schema.employees,
+          role: schema.roles,
+        })
+        .from(schema.employees)
+        .leftJoin(schema.roles, eq(schema.employees.role_id, schema.roles.id))
+        .where(finalFilter) as any
     )
       .limit(limit)
       .offset(skip)
       .orderBy(orderBy);
 
+    // Flatten results
+    const flattenedEmployees = employees.map((row: any) => ({
+      ...row.employee,
+      role_details: row.role,
+    }));
 
     if (with_total) {
       const results = await (this.db
@@ -114,26 +128,36 @@ export class EmployeesService {
         .from(schema.employees)
         .where(finalFilter) as any);
       const count = Number(results[0]?.count || 0);
-      return { employees, total: count };
+      return { employees: flattenedEmployees, total: count };
     }
 
     // Sanitize list
-    employees.forEach(emp => {
+    flattenedEmployees.forEach(emp => {
       if ('photo' in emp) delete (emp as any)['photo'];
       if ('avatar_url' in emp) delete (emp as any)['avatar_url'];
     });
 
-    return { employees };
+    return { employees: flattenedEmployees };
   }
 
   async findOne(employee_id: string) {
-    const [employee] = await this.db
-      .select()
+    const [result] = await this.db
+      .select({
+        employee: schema.employees,
+        role: schema.roles,
+      })
       .from(schema.employees)
+      .leftJoin(schema.roles, eq(schema.employees.role_id, schema.roles.id))
       .where(eq(schema.employees.employee_id, employee_id));
-    if (!employee) {
+
+    if (!result) {
       throw new NotFoundException(`Employee with ID ${employee_id} not found`);
     }
+
+    const employee = {
+      ...result.employee,
+      role_details: result.role,
+    };
 
     const documents = await this.db
       .select()
@@ -458,13 +482,14 @@ export class EmployeesService {
   }
 
   async getKpis(query: EmployeeQueryDto) {
-    const { search, status, unit, rank, served_in, deployed_at, fss_no, full_name, cnic } = query;
+    const { search, status, unit, rank, role, served_in, deployed_at, fss_no, full_name, cnic } = query;
 
     const filters: SQL[] = [];
 
     if (status) filters.push(eq(schema.employees.status, status));
     if (unit) filters.push(eq(schema.employees.unit, unit));
     if (rank) filters.push(eq(schema.employees.rank, rank));
+    if (role) filters.push(eq(schema.employees.role, role));
     if (served_in) filters.push(eq(schema.employees.served_in, served_in));
     if (deployed_at)
       filters.push(eq(schema.employees.deployed_at, deployed_at));

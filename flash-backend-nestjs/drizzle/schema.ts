@@ -536,6 +536,7 @@ export const employees = pgTable("employees", {
 	postalCode: text("postal_code"),
 	department: text(),
 	designation: text(),
+	role: text(),
 	enrolledAs: text("enrolled_as"),
 	employmentType: text("employment_type"),
 	shiftType: text("shift_type"),
@@ -792,4 +793,24 @@ export const rolesToPermissions = pgTable("roles_to_permissions", {
 			name: "roles_to_permissions_permission_id_permissions_id_fk"
 		}).onDelete("cascade"),
 	primaryKey({ columns: [table.roleId, table.permissionId], name: "roles_to_permissions_role_id_permission_id_pk"}),
+]);
+
+export const clientComplaints = pgTable("client_complaints", {
+	id: serial().primaryKey().notNull(),
+	clientId: text("client_id").notNull(),
+	title: text().notNull(),
+	description: text().notNull(),
+	category: text().default('general'),
+	status: text().default('open'),
+	priority: text().default('medium'),
+	assignedTo: text("assigned_to"),
+	resolution: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
+}, (table) => [
+	foreignKey({
+		columns: [table.clientId],
+		foreignColumns: [clients.clientId],
+		name: "client_complaints_client_id_clients_client_id_fk"
+	}).onDelete("cascade"),
 ]);

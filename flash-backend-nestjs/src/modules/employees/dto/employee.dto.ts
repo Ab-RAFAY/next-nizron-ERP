@@ -81,6 +81,7 @@ export class CreateEmployeeDto {
   // Employment Details
   @ApiPropertyOptional() @IsString() @IsOptional() department?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() designation?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() role?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() enrolled_as?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() employment_type?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() shift_type?: string;
@@ -199,6 +200,7 @@ export class CreateEmployeeDto {
   @ApiPropertyOptional() @IsString() @IsOptional() little_impression?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() final_signature?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() biometric_data?: string;
+  @ApiPropertyOptional() @IsInt() @IsOptional() role_id?: number;
 }
 
 /**
@@ -216,8 +218,10 @@ export class EmployeeQueryDto {
   @ApiPropertyOptional() @IsString() @IsOptional() status?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() unit?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() rank?: string;
+  @ApiPropertyOptional() @IsString() @IsOptional() role?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() served_in?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() person_status?: string;
+  @ApiPropertyOptional() @IsInt() @IsOptional() role_id?: number;
 
   @ApiPropertyOptional() @IsString() @IsOptional() deployed_at?: string;
   @ApiPropertyOptional() @IsString() @IsOptional() fss_no?: string;

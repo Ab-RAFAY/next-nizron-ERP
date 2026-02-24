@@ -306,6 +306,16 @@ export default function DashboardScreen() {
         formData.append('leave_type', leaveType);
       }
 
+      // For check_out and overtime_out, use the date from when check_in/overtime_in was recorded
+      // This handles night shifts that cross midnight (e.g., check in at 11 PM, check out at 1 AM next day)
+      let dateToSend = todayStr;
+      if (phase === 'check_out' && todayStatus?.check_in_date) {
+        dateToSend = todayStatus.check_in_date;
+      } else if (phase === 'overtime_out' && todayStatus?.overtime_in_date) {
+        dateToSend = todayStatus.overtime_in_date;
+      }
+      formData.append('date', dateToSend);
+
       const fileUri = imageUri.startsWith('file://') ? imageUri : `file://${imageUri}`;
       const fileName = fileUri.split('/').pop() || 'selfie.jpg';
       const fileType = 'image/jpeg';

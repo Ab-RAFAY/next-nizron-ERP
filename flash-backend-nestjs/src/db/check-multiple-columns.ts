@@ -13,7 +13,7 @@ async function checkAllColumns() {
   try {
     await client.connect();
     const tables = [
-      'general_inventory_items'
+      'vehicle_assignments'
     ];
     
     for (const table of tables) {

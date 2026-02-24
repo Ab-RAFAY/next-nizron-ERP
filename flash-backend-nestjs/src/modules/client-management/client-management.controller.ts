@@ -280,4 +280,36 @@ export class ClientManagementController {
   async deleteIndustry(@Param('id', ParseIntPipe) id: number) {
     return this.service.deleteIndustry(id);
   }
+
+  // Complaints
+  @Get('complaints')
+  @ApiOperation({ summary: 'List all client complaints' })
+  async listAllComplaints() {
+    return this.service.listAllComplaints();
+  }
+
+  @Put('complaints/:id')
+  @ApiOperation({ summary: 'Update complaint status/feedback' })
+  async updateComplaint(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: any,
+  ) {
+    return this.service.updateComplaint(id, dto);
+  }
+
+  @Delete('complaints/:id')
+  @ApiOperation({ summary: 'Delete complaint' })
+  async deleteComplaint(@Param('id', ParseIntPipe) id: number) {
+    return this.service.deleteComplaint(id);
+  }
+
+  @Get('debug-complaints')
+  async debugComplaints() {
+    try {
+      return await this.service.listAllComplaints();
+    } catch (e) {
+      console.error('DEBUG COMPLAINTS ERROR:', e);
+      return { error: e.message, stack: e.stack };
+    }
+  }
 }

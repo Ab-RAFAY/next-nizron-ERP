@@ -23,6 +23,8 @@ async function createApp() {
     app.enableCors({
       origin: true,
       credentials: true,
+      methods: '*',
+      allowedHeaders: '*',
     });
 
     app.useGlobalPipes(

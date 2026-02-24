@@ -6,6 +6,7 @@ import {
   timestamp,
   primaryKey,
   integer,
+  jsonb,
 } from 'drizzle-orm/pg-core';
 
 export const users = pgTable('users', {
@@ -23,6 +24,7 @@ export const roles = pgTable('roles', {
   id: serial('id').primaryKey(),
   name: text('name').unique().notNull(),
   description: text('description'),
+  permissions: jsonb('permissions').default([]),
 });
 
 export const permissions = pgTable('permissions', {

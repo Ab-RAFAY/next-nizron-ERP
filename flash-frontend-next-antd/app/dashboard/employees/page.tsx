@@ -51,6 +51,7 @@ interface Employee extends Record<string, unknown> {
   cnic_no?: string;
   cnic?: string;
   rank?: string;
+  role?: string;
   unit?: string;
   status: string;
 }
@@ -80,6 +81,7 @@ export default function EmployeesPage() {
     department: '',
     designation: '',
     enrolled_as: '',
+    role: '',
     date_of_enrolment: '',
     served_in: '',
     person_status: '',
@@ -120,6 +122,7 @@ export default function EmployeesPage() {
     if (filters.department) params.department = filters.department;
     if (filters.designation) params.designation = filters.designation;
     if (filters.enrolled_as) params.enrolled_as = filters.enrolled_as;
+    if (filters.role) params.role = filters.role;
     if (filters.date_of_enrolment) params.date_of_enrolment = filters.date_of_enrolment;
     if (filters.served_in) params.served_in = filters.served_in;
     if (filters.person_status) params.person_status = filters.person_status;
@@ -156,6 +159,7 @@ export default function EmployeesPage() {
     if (filters.cnic) params.cnic = filters.cnic;
     if (filters.served_in) params.served_in = filters.served_in;
     if (filters.person_status) params.person_status = filters.person_status;
+    if (filters.role) params.role = filters.role;
 
 
     const response = await employeeApi.getKpis(params);
@@ -168,7 +172,7 @@ export default function EmployeesPage() {
     fetchEmployees(1, pagination.pageSize, 'fss_no', 'desc');
     fetchKpis();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [filters.search, filters.status, filters.fss_no, filters.full_name, filters.cnic, filters.father_name, filters.date_of_birth, filters.mobile_number, filters.department, filters.designation, filters.enrolled_as, filters.date_of_enrolment, filters.served_in, filters.person_status]);
+  }, [filters.search, filters.status, filters.fss_no, filters.full_name, filters.cnic, filters.father_name, filters.date_of_birth, filters.mobile_number, filters.department, filters.designation, filters.enrolled_as, filters.role, filters.date_of_enrolment, filters.served_in, filters.person_status]);
 
   const handleCreate = () => {
     setEditingEmployee(null);
@@ -522,6 +526,14 @@ export default function EmployeesPage() {
       width: 100,
       sorter: true,
     },
+    {
+      title: 'Role',
+      dataIndex: 'role',
+      key: 'role',
+      width: 120,
+      sorter: true,
+      render: (text: string, record: any) => record.role_details?.name || text || '-',
+    },
     // {
     //   title: 'Unit',
     //   dataIndex: 'unit',
@@ -828,8 +840,8 @@ export default function EmployeesPage() {
       >
         <EmployeeForm
           initialValues={editingEmployee}
-          onSubmit={handleFormSubmit}
-          onCancel={() => setDrawerVisible(false)}
+          onSubmitAction={handleFormSubmit}
+          onCancelAction={() => setDrawerVisible(false)}
         />
       </Drawer>
 

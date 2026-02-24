@@ -7,10 +7,12 @@ import { eq ,or, sql} from 'drizzle-orm';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
 import { DRIZZLE } from '../../db/drizzle.module';
 import { employees } from '../../db/schema/employees';
+import { clients } from '../../db/schema/clients';
 import { LoginDto } from '../users/dto/user.dto';
 import { AuthService, JwtPayload } from './auth.service';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { EmployeeLoginDto } from './dto/employee-login.dto';
+import { ClientLoginDto } from './dto/client-login.dto';
 import { SetPasswordDto } from './dto/set-password.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
@@ -24,6 +26,43 @@ export class AuthController {
     private readonly jwtService: JwtService,
     private readonly authService: AuthService,
   ) {}
+
+  @Post('client-login')
+  @ApiBody({ type: ClientLoginDto })
+  async clientLogin(@Body() body: ClientLoginDto) {
+    const { email, password } = body;
+    
+    const [client] = await this.db
+      .select()
+      .from(clients)
+      .where(eq(clients.email, email));
+
+    if (!client) {
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    }
+
+    if (!client.password) {
+      throw new HttpException('No password set for this account', HttpStatus.UNAUTHORIZED);
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, client.password);
+    if (!isPasswordValid) {
+      throw new HttpException('Invalid credentials', HttpStatus.UNAUTHORIZED);
+    }
+
+    const payload = { 
+      sub: client.id, 
+      email: client.email,
+      type: 'client'
+    };
+
+    return { 
+      token: this.jwtService.sign(payload), 
+      client_id: client.id, 
+      name: client.name,
+      company_name: client.company_name
+    };
+  }
 
   @UseGuards(JwtAuthGuard)
   @Get('me')

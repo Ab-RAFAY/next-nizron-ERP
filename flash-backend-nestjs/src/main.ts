@@ -20,8 +20,10 @@ async function bootstrap() {
   app.useGlobalFilters(new HttpExceptionFilter());
 
   app.enableCors({
-    origin: true, // During dev, reflect origin
+    origin: true,
     credentials: true,
+    methods: '*',
+    allowedHeaders: '*',
   });
 
   // Global validation pipe

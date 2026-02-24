@@ -888,36 +888,36 @@ export default function EmployeeDetailPage() {
       <Card className="mb-6">
         <div ref={printRef}>
           {/* Profile Photo Section */}
-    
+
           {/* Enrolment Details */}
           <div className="section">
             <div className="section-title">Enrolment Details</div>
             <div className="field-grid">
               <Field label="FSS Number" value={employee.fss_no} />
-                 <Field label="Interviewed By" value={employee.interviewed_by} />
+              <Field label="Interviewed By" value={employee.interviewed_by} />
               <Field label="Introduced By" value={employee.introduced_by} />
               <Field label="Enrolled As" value={employee.enrolled_as} />
-                <Field label="Deployed At" value={employee.deployed_at} />
+              <Field label="Deployed At" value={employee.deployed_at} />
 
-                            <Field label="Pay (Rs)" value={employee.pay_rs} />
-                                          <Field label="BDM" value={employee.bdm} />
+              <Field label="Pay (Rs)" value={employee.pay_rs} />
+              <Field label="BDM" value={employee.bdm} />
 
 
               <Field label="Person Status" value={employee.person_status} />
-                     <Field label="Past Experience" value={employee.served_in} />
+              <Field label="Past Experience" value={employee.served_in} />
               {/* <Field label="Previous Employment" value={employee.previous_employment} /> */}
               <Field label="Experience in Security" value={employee.experience_in_security} />
 
-       <Field label="Unit" value={employee.unit} />
-                            <Field label="Rank" value={employee.rank} />
+              <Field label="Unit" value={employee.unit} />
+              <Field label="Rank" value={employee.rank} />
 
               <Field label="Date of Enrolment" value={employee.date_of_enrolment} />
-              
+
               <Field label="Date of Re-Enrolment" value={employee.date_of_re_enrolment} />
               <Field label="Original Document Held" value={employee.original_document_held} />
 
               <Field label="Status" value={employee.status} />
-           
+
               <Field label="Cause of Discharge" value={employee.cause_of_discharge} />
               <Field label="Medical Category" value={employee.medical_category} />
             </div>
@@ -929,18 +929,18 @@ export default function EmployeeDetailPage() {
             <div className="field-grid">
               <Field label="Full Name" value={employee.full_name} />
               <Field label="Blood Group" value={employee.blood_group} />
-                            <Field label="Father Name" value={employee.father_name} />
+              <Field label="Father Name" value={employee.father_name} />
 
-                            <Field label="CNIC" value={employee.cnic || employee.cnic_no} />
+              <Field label="CNIC" value={employee.cnic || employee.cnic_no} />
               <Field label="CNIC Expiry" value={employee.cnic_expiry_date || employee.cnic_expiry} />
-                       <Field label="Date of Birth" value={employee.date_of_birth || employee.dob} />
+              <Field label="Date of Birth" value={employee.date_of_birth || employee.dob} />
               <Field label="Height" value={employee.height} />
               <Field label="Civil Education" value={employee.education} />
               <Field label="Medical Category" value={employee.medical_category} />
 
               <Field label="Gender" value={employee.gender} />
 
-     
+
               {/* <Field label="Bio Data" value={employee.bio_data} /> */}
               <Field label="Domicile" value={employee.domicile} />
               {/* <Field label="Languages Spoken" value={employee.languages_spoken} /> */}
@@ -948,7 +948,7 @@ export default function EmployeeDetailPage() {
               <Field label="Email" value={employee.email} />
               <Field label="Main Number" value={employee.main_number} />
               <Field label="EOBI Number" value={employee.eobi_no} />
-                   <Field label="Insurance" value={employee.insurance} />
+              <Field label="Insurance" value={employee.insurance} />
               <Field label="Social Security #" value={employee.social_security} />
             </div>
           </div>
@@ -977,7 +977,7 @@ export default function EmployeeDetailPage() {
             </div>
           </div>
 
-       {/* Family & Next of Kin */}
+          {/* Family & Next of Kin */}
           <div className="section">
             <div className="section-title">Family & Next of Kin</div>
             <div className="field-grid">
@@ -1004,11 +1004,11 @@ export default function EmployeeDetailPage() {
               <Field label="Account Number" value={employee.account_number || employee.bank_account_number} />
               <Field label="IFSC Code" value={employee.ifsc_code} />
               <Field label="PAN Name" value={employee.pan_name} />
-         
+
             </div>
           </div>
 
-   
+
           {/* Verification & Documents */}
           <div className="section">
             <div className="section-title">Verification & Documents</div>
@@ -1069,7 +1069,7 @@ export default function EmployeeDetailPage() {
         size="large"
         destroyOnClose
       >
-        <EmployeeForm initialValues={employee} onSubmit={handleUpdate} onCancel={() => setEditDrawerVisible(false)} />
+        <EmployeeForm initialValues={employee} onSubmitAction={handleUpdate} onCancelAction={() => setEditDrawerVisible(false)} />
       </Drawer>
 
       <Drawer
