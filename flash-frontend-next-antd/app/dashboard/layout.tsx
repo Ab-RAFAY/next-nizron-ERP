@@ -22,6 +22,7 @@ import {
   FileDoneOutlined,
   AppstoreOutlined,
   BulbOutlined,
+  ShoppingOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
@@ -126,6 +127,16 @@ export default function DashboardLayout({
           key: '/dashboard/clients/complaints',
           icon: <BulbOutlined />,
           label: 'Complaints',
+        },
+        {
+          key: '/dashboard/vendors',
+          icon: <TeamOutlined />,
+          label: 'Vendors',
+        },
+        {
+          key: '/dashboard/purchases',
+          icon: <ShoppingOutlined />,
+          label: 'Purchases',
         },
         {
           key: '/dashboard/finance',

@@ -82,7 +82,6 @@ import { ClientPortalModule } from './modules/client-portal/client-portal.module
     ClientManagementModule,
     GeneralInventoryModule,
     RestrictedInventoryModule,
-    RestrictedInventoryModule,
     UploadsModule,
     CompanySettingsModule,
     ClientPortalModule,

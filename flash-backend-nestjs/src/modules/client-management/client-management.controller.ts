@@ -311,5 +311,166 @@ export class ClientManagementController {
       console.error('DEBUG COMPLAINTS ERROR:', e);
       return { error: e.message, stack: e.stack };
     }
+
+  // Vendors
+  @Get('vendors')
+  @ApiOperation({ summary: 'List vendors' })
+  async listVendors() {
+    return this.service.listVendors();
+  }
+
+  @Post('vendors')
+  @ApiOperation({ summary: 'Create vendor' })
+  async createVendor(@Body() dto: any) {
+    return this.service.createVendor(dto);
+  }
+
+  @Get('vendors/:id')
+  @ApiOperation({ summary: 'Get vendor' })
+  async getVendor(@Param('id', ParseIntPipe) id: number) {
+    return this.service.getVendor(id);
+  }
+
+  @Put('vendors/:id')
+  @ApiOperation({ summary: 'Update vendor' })
+  async updateVendor(@Param('id', ParseIntPipe) id: number, @Body() dto: any) {
+    return this.service.updateVendor(id, dto);
+  }
+
+  @Delete('vendors/:id')
+  @ApiOperation({ summary: 'Delete vendor' })
+  async deleteVendor(@Param('id', ParseIntPipe) id: number) {
+    return this.service.deleteVendor(id);
+  }
+
+  // Vendor Contacts
+  @Get('vendors/:id/contacts')
+  @ApiOperation({ summary: 'List vendor contacts' })
+  async listVendorContacts(@Param('id', ParseIntPipe) vendorId: number) {
+    return this.service.listVendorContacts(vendorId);
+  }
+
+  @Post('vendors/:id/contacts')
+  @ApiOperation({ summary: 'Create vendor contact' })
+  async createVendorContact(@Param('id', ParseIntPipe) vendorId: number, @Body() dto: any) {
+    return this.service.createVendorContact(vendorId, dto);
+  }
+
+  @Put('vendors/:vendorId/contacts/:contactId')
+  @ApiOperation({ summary: 'Update vendor contact' })
+  async updateVendorContact(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+    @Param('contactId', ParseIntPipe) contactId: number,
+    @Body() dto: any,
+  ) {
+    return this.service.updateVendorContact(vendorId, contactId, dto);
+  }
+
+  @Delete('vendors/:vendorId/contacts/:contactId')
+  @ApiOperation({ summary: 'Delete vendor contact' })
+  async deleteVendorContact(
+    @Param('vendorId', ParseIntPipe) vendorId: number,
+    @Param('contactId', ParseIntPipe) contactId: number,
+  ) {
+    return this.service.deleteVendorContact(vendorId, contactId);
+  }
+
+  // Vendor Purchases
+  @Get('vendors/:id/purchases')
+  @ApiOperation({ summary: 'List vendor purchases' })
+  async listVendorPurchases(@Param('id', ParseIntPipe) vendorId: number) {
+    return this.service.listVendorPurchases(vendorId);
+  }
+
+  // Purchases
+  @Get('purchases')
+  @ApiOperation({ summary: 'List purchases' })
+  async listPurchases() {
+    return this.service.listPurchases();
+  }
+
+  @Post('purchases')
+  @ApiOperation({ summary: 'Create purchase' })
+  async createPurchase(@Body() dto: any) {
+    return this.service.createPurchase(dto);
+  }
+
+  @Get('purchases/:id')
+  @ApiOperation({ summary: 'Get purchase' })
+  async getPurchase(@Param('id', ParseIntPipe) id: number) {
+    return this.service.getPurchase(id);
+  }
+
+  @Put('purchases/:id')
+  @ApiOperation({ summary: 'Update purchase' })
+  async updatePurchase(@Param('id', ParseIntPipe) id: number, @Body() dto: any) {
+    return this.service.updatePurchase(id, dto);
+  }
+
+  @Delete('purchases/:id')
+  @ApiOperation({ summary: 'Delete purchase' })
+  async deletePurchase(@Param('id', ParseIntPipe) id: number) {
+    return this.service.deletePurchase(id);
+  }
+
+  // Purchase Items
+  @Get('purchases/:id/items')
+  @ApiOperation({ summary: 'List purchase items' })
+  async listPurchaseItems(@Param('id', ParseIntPipe) purchaseId: number) {
+    return this.service.listPurchaseItems(purchaseId);
+  }
+
+  @Post('purchases/:id/items')
+  @ApiOperation({ summary: 'Create purchase item' })
+  async createPurchaseItem(@Param('id', ParseIntPipe) purchaseId: number, @Body() dto: any) {
+    return this.service.createPurchaseItem(purchaseId, dto);
+  }
+
+  @Put('purchases/:purchaseId/items/:itemId')
+  @ApiOperation({ summary: 'Update purchase item' })
+  async updatePurchaseItem(
+    @Param('purchaseId', ParseIntPipe) purchaseId: number,
+    @Param('itemId', ParseIntPipe) itemId: number,
+    @Body() dto: any,
+  ) {
+    return this.service.updatePurchaseItem(purchaseId, itemId, dto);
+  }
+
+  @Delete('purchases/:purchaseId/items/:itemId')
+  @ApiOperation({ summary: 'Delete purchase item' })
+  async deletePurchaseItem(
+    @Param('purchaseId', ParseIntPipe) purchaseId: number,
+    @Param('itemId', ParseIntPipe) itemId: number,
+  ) {
+    return this.service.deletePurchaseItem(purchaseId, itemId);
+  }
+
+  // Purchase Documents
+  @Get('purchases/:id/documents')
+  @ApiOperation({ summary: 'List purchase documents' })
+  async listPurchaseDocuments(@Param('id', ParseIntPipe) purchaseId: number) {
+    return this.service.listPurchaseDocuments(purchaseId);
+  }
+
+  @Post('purchases/:id/documents')
+  @ApiOperation({ summary: 'Create purchase document' })
+  async createPurchaseDocument(@Param('id', ParseIntPipe) purchaseId: number, @Body() dto: any) {
+    return this.service.createPurchaseDocument(purchaseId, dto);
+  }
+
+  @Delete('purchases/:purchaseId/documents/:documentId')
+  @ApiOperation({ summary: 'Delete purchase document' })
+  async deletePurchaseDocument(
+    @Param('purchaseId', ParseIntPipe) purchaseId: number,
+    @Param('documentId', ParseIntPipe) documentId: number,
+  ) {
+    return this.service.deletePurchaseDocument(purchaseId, documentId);
+  }
+
+  // Purchase Statistics
+  @Get('purchases/statistics')
+  @ApiOperation({ summary: 'Get purchase statistics' })
+  async getPurchaseStatistics() {
+    return this.service.getPurchaseStatistics();
   }
 }
