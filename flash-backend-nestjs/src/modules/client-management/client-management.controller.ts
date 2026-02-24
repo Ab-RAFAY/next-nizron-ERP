@@ -311,6 +311,7 @@ export class ClientManagementController {
       console.error('DEBUG COMPLAINTS ERROR:', e);
       return { error: e.message, stack: e.stack };
     }
+  }
 
   // Vendors
   @Get('vendors')
