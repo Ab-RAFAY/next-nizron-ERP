@@ -21,6 +21,7 @@ import {
   ClockCircleOutlined,
   FileDoneOutlined,
   AppstoreOutlined,
+  ShoppingOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
@@ -117,6 +118,16 @@ export default function DashboardLayout({
           key: '/dashboard/clients',
           icon: <ShopOutlined />,
           label: 'Clients',
+        },
+        {
+          key: '/dashboard/vendors',
+          icon: <TeamOutlined />,
+          label: 'Vendors',
+        },
+        {
+          key: '/dashboard/purchases',
+          icon: <ShoppingOutlined />,
+          label: 'Purchases',
         },
         {
           key: '/dashboard/finance',

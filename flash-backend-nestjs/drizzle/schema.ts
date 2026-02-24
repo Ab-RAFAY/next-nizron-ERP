@@ -793,3 +793,98 @@ export const rolesToPermissions = pgTable("roles_to_permissions", {
 		}).onDelete("cascade"),
 	primaryKey({ columns: [table.roleId, table.permissionId], name: "roles_to_permissions_role_id_permission_id_pk"}),
 ]);
+
+// Vendor Management Tables
+export const vendors = pgTable("vendors", {
+	id: serial().primaryKey().notNull(),
+	vendorId: text("vendor_id").notNull().unique(),
+	name: text().notNull(),
+	companyName: text("company_name"),
+	email: text(),
+	phone: text(),
+	website: text(),
+	category: text().notNull(),
+	status: text().notNull().default('active'),
+	address: text(),
+	notes: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
+});
+
+export const vendorContacts = pgTable("vendor_contacts", {
+	id: serial().primaryKey().notNull(),
+	vendorId: integer("vendor_id").notNull(),
+	name: text().notNull(),
+	email: text(),
+	phone: text(),
+	position: text(),
+	notes: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+}, (table) => [
+	foreignKey({
+			columns: [table.vendorId],
+			foreignColumns: [vendors.id],
+			name: "vendor_contacts_vendor_id_vendors_id_fk"
+		}).onDelete("cascade"),
+]);
+
+// Purchase Management Tables
+export const purchases = pgTable("purchases", {
+	id: serial().primaryKey().notNull(),
+	purchaseOrder: text("purchase_order").notNull().unique(),
+	vendorId: integer("vendor_id").notNull(),
+	date: timestamp({ mode: 'string' }).notNull(),
+	amount: real().notNull(),
+	status: text().notNull().default('pending'),
+	category: text().notNull(),
+	priority: text().default('medium'),
+	paymentTerms: text("payment_terms"),
+	deliveryDate: timestamp("delivery_date", { mode: 'string' }),
+	deliveryAddress: text("delivery_address"),
+	referenceNumber: text("reference_number"),
+	contactPerson: text("contact_person"),
+	description: text(),
+	notes: text(),
+	termsConditions: text("terms_conditions"),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
+}, (table) => [
+	foreignKey({
+			columns: [table.vendorId],
+			foreignColumns: [vendors.id],
+			name: "purchases_vendor_id_vendors_id_fk"
+		}),
+]);
+
+export const purchaseItems = pgTable("purchase_items", {
+	id: serial().primaryKey().notNull(),
+	purchaseId: integer("purchase_id").notNull(),
+	name: text().notNull(),
+	description: text(),
+	quantity: integer().notNull(),
+	unitPrice: real("unit_price").notNull(),
+	notes: text(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+}, (table) => [
+	foreignKey({
+			columns: [table.purchaseId],
+			foreignColumns: [purchases.id],
+			name: "purchase_items_purchase_id_purchases_id_fk"
+		}).onDelete("cascade"),
+]);
+
+export const purchaseDocuments = pgTable("purchase_documents", {
+	id: serial().primaryKey().notNull(),
+	purchaseId: integer("purchase_id").notNull(),
+	fileName: text("file_name").notNull(),
+	filePath: text("file_path").notNull(),
+	fileSize: integer("file_size"),
+	mimeType: text("mime_type"),
+	uploadedAt: timestamp("uploaded_at", { mode: 'string' }).defaultNow(),
+}, (table) => [
+	foreignKey({
+			columns: [table.purchaseId],
+			foreignColumns: [purchases.id],
+			name: "purchase_documents_purchase_id_purchases_id_fk"
+		}).onDelete("cascade"),
+]);

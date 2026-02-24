@@ -2,7 +2,7 @@ import { Injectable, NotFoundException, Inject, Logger } from '@nestjs/common';
 import { DRIZZLE } from '../../db/drizzle.module';
 import * as schema from '../../db/schema';
 import { NodePgDatabase } from 'drizzle-orm/node-postgres';
-import { eq, and, desc, or, sql } from 'drizzle-orm';
+import { eq, and, desc, or, sql, ilike, count } from 'drizzle-orm';
 import { CloudStorageService } from '../../common/storage/cloud-storage.service';
 
 @Injectable()
@@ -530,5 +530,579 @@ export class ClientManagementService {
     return { message: 'Deleted' };
   }
 
+  // Vendors
+  async listVendors(query: any = {}) {
+    const { search, status, category } = query;
+    
+    let whereConditions = [];
+    
+    if (search) {
+      whereConditions.push(
+        ilike(schema.vendors.name, `%${search}%`)
+      );
+    }
+    
+    if (status) {
+      whereConditions.push(eq(schema.vendors.status, status));
+    }
+    
+    if (category) {
+      whereConditions.push(eq(schema.vendors.category, category));
+    }
 
+    const vendors = await this.db
+      .select({
+        id: schema.vendors.id,
+        vendor_id: schema.vendors.vendorId,
+        name: schema.vendors.name,
+        company_name: schema.vendors.companyName,
+        email: schema.vendors.email,
+        phone: schema.vendors.phone,
+        website: schema.vendors.website,
+        category: schema.vendors.category,
+        status: schema.vendors.status,
+        address: schema.vendors.address,
+        notes: schema.vendors.notes,
+        created_at: schema.vendors.createdAt,
+        updated_at: schema.vendors.updatedAt,
+      })
+      .from(schema.vendors)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .orderBy(desc(schema.vendors.createdAt));
+
+    return { vendors };
+  }
+
+  async createVendor(dto: any) {
+    // Generate vendor ID if not provided
+    if (!dto.vendor_id) {
+      const timestamp = Date.now().toString().slice(-6);
+      const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      dto.vendor_id = `VND-${timestamp}-${randomNum}`;
+    }
+
+    const [vendor] = await this.db
+      .insert(schema.vendors)
+      .values({
+        vendorId: dto.vendor_id,
+        name: dto.name,
+        companyName: dto.company_name,
+        email: dto.email,
+        phone: dto.phone,
+        website: dto.website,
+        category: dto.category,
+        status: dto.status || 'active',
+        address: dto.address,
+        notes: dto.notes,
+      })
+      .returning();
+
+    return { vendor };
+  }
+
+  async getVendor(id: number) {
+    const [vendor] = await this.db
+      .select()
+      .from(schema.vendors)
+      .where(eq(schema.vendors.id, id));
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    return { vendor };
+  }
+
+  async updateVendor(id: number, dto: any) {
+    const [vendor] = await this.db
+      .update(schema.vendors)
+      .set({
+        vendorId: dto.vendor_id,
+        name: dto.name,
+        companyName: dto.company_name,
+        email: dto.email,
+        phone: dto.phone,
+        website: dto.website,
+        category: dto.category,
+        status: dto.status,
+        address: dto.address,
+        notes: dto.notes,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(schema.vendors.id, id))
+      .returning();
+
+    if (!vendor) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    return { vendor };
+  }
+
+  async deleteVendor(id: number) {
+    const [deleted] = await this.db
+      .delete(schema.vendors)
+      .where(eq(schema.vendors.id, id))
+      .returning({ id: schema.vendors.id });
+
+    if (!deleted) {
+      throw new NotFoundException('Vendor not found');
+    }
+
+    return { message: 'Vendor deleted successfully' };
+  }
+
+  // Vendor Contacts
+  async listVendorContacts(vendorId: number) {
+    const contacts = await this.db
+      .select()
+      .from(schema.vendorContacts)
+      .where(eq(schema.vendorContacts.vendorId, vendorId))
+      .orderBy(desc(schema.vendorContacts.createdAt));
+
+    return { contacts };
+  }
+
+  async createVendorContact(vendorId: number, dto: any) {
+    const [contact] = await this.db
+      .insert(schema.vendorContacts)
+      .values({
+        vendorId: vendorId,
+        name: dto.name,
+        email: dto.email,
+        phone: dto.phone,
+        position: dto.position,
+        notes: dto.notes,
+      })
+      .returning();
+
+    return { contact };
+  }
+
+  async updateVendorContact(vendorId: number, contactId: number, dto: any) {
+    const [contact] = await this.db
+      .update(schema.vendorContacts)
+      .set({
+        name: dto.name,
+        email: dto.email,
+        phone: dto.phone,
+        position: dto.position,
+        notes: dto.notes,
+      })
+      .where(
+        and(
+          eq(schema.vendorContacts.id, contactId),
+          eq(schema.vendorContacts.vendorId, vendorId)
+        )
+      )
+      .returning();
+
+    if (!contact) {
+      throw new NotFoundException('Vendor contact not found');
+    }
+
+    return { contact };
+  }
+
+  async deleteVendorContact(vendorId: number, contactId: number) {
+    const [deleted] = await this.db
+      .delete(schema.vendorContacts)
+      .where(
+        and(
+          eq(schema.vendorContacts.id, contactId),
+          eq(schema.vendorContacts.vendorId, vendorId)
+        )
+      )
+      .returning({ id: schema.vendorContacts.id });
+
+    if (!deleted) {
+      throw new NotFoundException('Vendor contact not found');
+    }
+
+    return { message: 'Vendor contact deleted successfully' };
+  }
+
+  // Vendor Purchases
+  async listVendorPurchases(vendorId: number) {
+    const purchases = await this.db
+      .select()
+      .from(schema.purchases)
+      .where(eq(schema.purchases.vendorId, vendorId))
+      .orderBy(desc(schema.purchases.createdAt));
+
+    return { purchases };
+  }
+
+  // Purchases
+  async listPurchases(query: any = {}) {
+    const { search, status, category, priority, vendor_id, date_from, date_to } = query;
+    
+    let whereConditions = [];
+    
+    if (search) {
+      whereConditions.push(
+        ilike(schema.purchases.purchaseOrder, `%${search}%`)
+      );
+    }
+    
+    if (status) {
+      whereConditions.push(eq(schema.purchases.status, status));
+    }
+
+    if (category) {
+      whereConditions.push(eq(schema.purchases.category, category));
+    }
+
+    if (priority) {
+      whereConditions.push(eq(schema.purchases.priority, priority));
+    }
+
+    if (vendor_id) {
+      whereConditions.push(eq(schema.purchases.vendorId, parseInt(vendor_id)));
+    }
+
+    if (date_from) {
+      whereConditions.push(sql`${schema.purchases.date} >= ${date_from}`);
+    }
+
+    if (date_to) {
+      whereConditions.push(sql`${schema.purchases.date} <= ${date_to}`);
+    }
+
+    const purchases = await this.db
+      .select({
+        id: schema.purchases.id,
+        purchase_order: schema.purchases.purchaseOrder,
+        date: schema.purchases.date,
+        vendor_id: schema.purchases.vendorId,
+        vendor_name: schema.vendors.name,
+        amount: schema.purchases.amount,
+        status: schema.purchases.status,
+        category: schema.purchases.category,
+        priority: schema.purchases.priority,
+        description: schema.purchases.description,
+        payment_terms: schema.purchases.paymentTerms,
+        delivery_date: schema.purchases.deliveryDate,
+        notes: schema.purchases.notes,
+        created_at: schema.purchases.createdAt,
+        updated_at: schema.purchases.updatedAt,
+      })
+      .from(schema.purchases)
+      .leftJoin(schema.vendors, eq(schema.purchases.vendorId, schema.vendors.id))
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .orderBy(desc(schema.purchases.createdAt));
+
+    return { purchases };
+  }
+
+  async createPurchase(dto: any) {
+    // Generate purchase order number if not provided
+    if (!dto.purchase_order) {
+      const timestamp = Date.now().toString().slice(-6);
+      const randomNum = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      dto.purchase_order = `PO-${timestamp}-${randomNum}`;
+    }
+
+    // Verify vendor exists if vendor_id is provided
+    if (dto.vendor_id) {
+      const [vendor] = await this.db
+        .select({ id: schema.vendors.id })
+        .from(schema.vendors)
+        .where(eq(schema.vendors.id, dto.vendor_id));
+      
+      if (!vendor) {
+        throw new NotFoundException('Vendor not found');
+      }
+    }
+
+    const [purchase] = await this.db
+      .insert(schema.purchases)
+      .values({
+        purchaseOrder: dto.purchase_order,
+        date: dto.date || new Date().toISOString().split('T')[0],
+        vendorId: dto.vendor_id,
+        amount: dto.amount || 0,
+        status: dto.status || 'pending',
+        category: dto.category,
+        priority: dto.priority || 'medium',
+        description: dto.description,
+        paymentTerms: dto.payment_terms,
+        deliveryDate: dto.delivery_date,
+        notes: dto.notes,
+      })
+      .returning();
+
+    return { purchase };
+  }
+
+  async getPurchase(id: number) {
+    const [purchase] = await this.db
+      .select({
+        id: schema.purchases.id,
+        purchase_order: schema.purchases.purchaseOrder,
+        date: schema.purchases.date,
+        vendor_id: schema.purchases.vendorId,
+        vendor_name: schema.vendors.name,
+        vendor_company: schema.vendors.companyName,
+        vendor_email: schema.vendors.email,
+        vendor_phone: schema.vendors.phone,
+        amount: schema.purchases.amount,
+        status: schema.purchases.status,
+        category: schema.purchases.category,
+        priority: schema.purchases.priority,
+        description: schema.purchases.description,
+        payment_terms: schema.purchases.paymentTerms,
+        delivery_date: schema.purchases.deliveryDate,
+        notes: schema.purchases.notes,
+        created_at: schema.purchases.createdAt,
+        updated_at: schema.purchases.updatedAt,
+      })
+      .from(schema.purchases)
+      .leftJoin(schema.vendors, eq(schema.purchases.vendorId, schema.vendors.id))
+      .where(eq(schema.purchases.id, id));
+
+    if (!purchase) {
+      throw new NotFoundException('Purchase not found');
+    }
+
+    return { purchase };
+  }
+
+  async updatePurchase(id: number, dto: any) {
+    // Verify vendor exists if vendor_id is being updated
+    if (dto.vendor_id) {
+      const [vendor] = await this.db
+        .select({ id: schema.vendors.id })
+        .from(schema.vendors)
+        .where(eq(schema.vendors.id, dto.vendor_id));
+      
+      if (!vendor) {
+        throw new NotFoundException('Vendor not found');
+      }
+    }
+
+    const [purchase] = await this.db
+      .update(schema.purchases)
+      .set({
+        purchaseOrder: dto.purchase_order,
+        date: dto.date,
+        vendorId: dto.vendor_id,
+        amount: dto.amount,
+        status: dto.status,
+        category: dto.category,
+        priority: dto.priority,
+        description: dto.description,
+        paymentTerms: dto.payment_terms,
+        deliveryDate: dto.delivery_date,
+        notes: dto.notes,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(schema.purchases.id, id))
+      .returning();
+
+    if (!purchase) {
+      throw new NotFoundException('Purchase not found');
+    }
+
+    return { purchase };
+  }
+
+  async deletePurchase(id: number) {
+    const [deleted] = await this.db
+      .delete(schema.purchases)
+      .where(eq(schema.purchases.id, id))
+      .returning({ id: schema.purchases.id });
+
+    if (!deleted) {
+      throw new NotFoundException('Purchase not found');
+    }
+
+    return { message: 'Purchase deleted successfully' };
+  }
+
+  // Purchase Items
+  async listPurchaseItems(purchaseId: number) {
+    const items = await this.db
+      .select()
+      .from(schema.purchaseItems)
+      .where(eq(schema.purchaseItems.purchaseId, purchaseId))
+      .orderBy(desc(schema.purchaseItems.createdAt));
+
+    return { items };
+  }
+
+  async createPurchaseItem(purchaseId: number, dto: any) {
+    const [item] = await this.db
+      .insert(schema.purchaseItems)
+      .values({
+        purchaseId: purchaseId,
+        name: dto.item_name || dto.name,
+        description: dto.description,
+        quantity: dto.quantity,
+        unitPrice: dto.unit_price,
+        notes: dto.notes,
+      })
+      .returning();
+
+    // Update total purchase amount
+    await this.updatePurchaseTotal(purchaseId);
+
+    return { item };
+  }
+
+  async updatePurchaseItem(purchaseId: number, itemId: number, dto: any) {
+    const [item] = await this.db
+      .update(schema.purchaseItems)
+      .set({
+        name: dto.item_name || dto.name,
+        description: dto.description,
+        quantity: dto.quantity,
+        unitPrice: dto.unit_price,
+        notes: dto.notes,
+      })
+      .where(
+        and(
+          eq(schema.purchaseItems.id, itemId),
+          eq(schema.purchaseItems.purchaseId, purchaseId)
+        )
+      )
+      .returning();
+
+    if (!item) {
+      throw new NotFoundException('Purchase item not found');
+    }
+
+    // Update total purchase amount
+    await this.updatePurchaseTotal(purchaseId);
+
+    return { item };
+  }
+
+  async deletePurchaseItem(purchaseId: number, itemId: number) {
+    const [deleted] = await this.db
+      .delete(schema.purchaseItems)
+      .where(
+        and(
+          eq(schema.purchaseItems.id, itemId),
+          eq(schema.purchaseItems.purchaseId, purchaseId)
+        )
+      )
+      .returning({ id: schema.purchaseItems.id });
+
+    if (!deleted) {
+      throw new NotFoundException('Purchase item not found');
+    }
+
+    // Update total purchase amount
+    await this.updatePurchaseTotal(purchaseId);
+
+    return { message: 'Purchase item deleted successfully' };
+  }
+
+  // Purchase Documents
+  async listPurchaseDocuments(purchaseId: number) {
+    const documents = await this.db
+      .select()
+      .from(schema.purchaseDocuments)
+      .where(eq(schema.purchaseDocuments.purchaseId, purchaseId))
+      .orderBy(desc(schema.purchaseDocuments.uploadedAt));
+
+    return { documents };
+  }
+
+  async createPurchaseDocument(purchaseId: number, dto: any) {
+    const [document] = await this.db
+      .insert(schema.purchaseDocuments)
+      .values({
+        purchaseId: purchaseId,
+        fileName: dto.file_name,
+        filePath: dto.file_path,
+        fileSize: dto.file_size,
+        mimeType: dto.mime_type,
+      })
+      .returning();
+
+    return { document };
+  }
+
+  async deletePurchaseDocument(purchaseId: number, documentId: number) {
+    const [deleted] = await this.db
+      .delete(schema.purchaseDocuments)
+      .where(
+        and(
+          eq(schema.purchaseDocuments.id, documentId),
+          eq(schema.purchaseDocuments.purchaseId, purchaseId)
+        )
+      )
+      .returning({ id: schema.purchaseDocuments.id });
+
+    if (!deleted) {
+      throw new NotFoundException('Purchase document not found');
+    }
+
+    return { message: 'Purchase document deleted successfully' };
+  }
+
+  // Purchase Statistics
+  async getPurchaseStatistics(query: any = {}) {
+    const { date_from, date_to, vendor_id } = query;
+
+    let whereConditions = [];
+
+    if (date_from) {
+      whereConditions.push(sql`${schema.purchases.date} >= ${date_from}`);
+    }
+
+    if (date_to) {
+      whereConditions.push(sql`${schema.purchases.date} <= ${date_to}`);
+    }
+
+    if (vendor_id) {
+      whereConditions.push(eq(schema.purchases.vendorId, parseInt(vendor_id)));
+    }
+
+    // Total purchases and amount
+    const [totalStats] = await this.db
+      .select({
+        total_purchases: count(schema.purchases.id),
+        total_amount: sql<number>`COALESCE(SUM(${schema.purchases.amount}), 0)`,
+      })
+      .from(schema.purchases)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined);
+
+    // Status breakdown
+    const statusBreakdown = await this.db
+      .select({
+        status: schema.purchases.status,
+        count: count(schema.purchases.id),
+        amount: sql<number>`COALESCE(SUM(${schema.purchases.amount}), 0)`,
+      })
+      .from(schema.purchases)
+      .where(whereConditions.length > 0 ? and(...whereConditions) : undefined)
+      .groupBy(schema.purchases.status);
+
+    return {
+      total_purchases: totalStats.total_purchases,
+      total_amount: totalStats.total_amount,
+      status_breakdown: statusBreakdown,
+    };
+  }
+
+  // Helper method to update purchase total amount
+  private async updatePurchaseTotal(purchaseId: number) {
+    const [totalResult] = await this.db
+      .select({
+        total: sql<number>`COALESCE(SUM(${schema.purchaseItems.quantity} * ${schema.purchaseItems.unitPrice}), 0)`,
+      })
+      .from(schema.purchaseItems)
+      .where(eq(schema.purchaseItems.purchaseId, purchaseId));
+
+    await this.db
+      .update(schema.purchases)
+      .set({
+        amount: totalResult.total,
+        updatedAt: new Date().toISOString(),
+      })
+      .where(eq(schema.purchases.id, purchaseId));
+  }
 }

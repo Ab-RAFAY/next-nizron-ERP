@@ -79,7 +79,6 @@ import { CompanySettingsModule } from './modules/company-settings/company-settin
     ClientManagementModule,
     GeneralInventoryModule,
     RestrictedInventoryModule,
-    RestrictedInventoryModule,
     UploadsModule,
     CompanySettingsModule,
   ],

@@ -7,3 +7,5 @@ export * from './finance';
 export * from './clients';
 export * from './inventory';
 export * from './company-settings';
+export * from './vendors';
+export * from './purchases';

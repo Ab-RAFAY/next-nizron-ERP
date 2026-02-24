@@ -813,3 +813,106 @@ export const commonApi = {
   upload: (formData: FormData) => api.uploadFile('/api/uploads', formData),
 };
 
+// Vendor API - now integrated within client management
+export const vendorApi = {
+  // Vendors
+  getAll: () => api.get("/client-management/vendors"),
+  getOne: (id: number) => api.get(`/client-management/vendors/${id}`),
+  create: (data: Record<string, unknown>) =>
+    api.post("/client-management/vendors", data),
+  update: (id: number, data: Record<string, unknown>) =>
+    api.put(`/client-management/vendors/${id}`, data),
+  delete: (id: number) => api.delete(`/client-management/vendors/${id}`),
+
+  // Vendor Contacts
+  getContacts: (vendorId: number) =>
+    api.get(`/client-management/vendors/${vendorId}/contacts`),
+  createContact: (vendorId: number, data: Record<string, unknown>) =>
+    api.post(`/client-management/vendors/${vendorId}/contacts`, data),
+  updateContact: (
+    vendorId: number,
+    contactId: number,
+    data: Record<string, unknown>,
+  ) =>
+    api.put(
+      `/client-management/vendors/${vendorId}/contacts/${contactId}`,
+      data,
+    ),
+  deleteContact: (vendorId: number, contactId: number) =>
+    api.delete(
+      `/client-management/vendors/${vendorId}/contacts/${contactId}`,
+    ),
+
+  // Vendor Purchases
+  getPurchases: (vendorId: number) =>
+    api.get(`/client-management/vendors/${vendorId}/purchases`),
+};
+
+// Purchase API - now integrated within client management
+export const purchaseApi = {
+  // Purchases
+  getAll: (query?: Record<string, unknown>) => {
+    const params = new URLSearchParams();
+    if (query) {
+      Object.entries(query).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value));
+        }
+      });
+    }
+    return api.get(
+      `/client-management/purchases${params.toString() ? "?" + params.toString() : ""}`,
+    );
+  },
+  getOne: (id: number) => api.get(`/client-management/purchases/${id}`),
+  create: (data: Record<string, unknown>) =>
+    api.post("/client-management/purchases", data),
+  update: (id: number, data: Record<string, unknown>) =>
+    api.put(`/client-management/purchases/${id}`, data),
+  delete: (id: number) => api.delete(`/client-management/purchases/${id}`),
+
+  // Purchase Items
+  getItems: (purchaseId: number) =>
+    api.get(`/client-management/purchases/${purchaseId}/items`),
+  createItem: (purchaseId: number, data: Record<string, unknown>) =>
+    api.post(`/client-management/purchases/${purchaseId}/items`, data),
+  updateItem: (
+    purchaseId: number,
+    itemId: number,
+    data: Record<string, unknown>,
+  ) =>
+    api.put(
+      `/client-management/purchases/${purchaseId}/items/${itemId}`,
+      data,
+    ),
+  deleteItem: (purchaseId: number, itemId: number) =>
+    api.delete(
+      `/client-management/purchases/${purchaseId}/items/${itemId}`,
+    ),
+
+  // Purchase Documents
+  getDocuments: (purchaseId: number) =>
+    api.get(`/client-management/purchases/${purchaseId}/documents`),
+  uploadDocument: (purchaseId: number, formData: FormData) =>
+    api.uploadFile(`/client-management/purchases/${purchaseId}/documents`, formData),
+  deleteDocument: (purchaseId: number, documentId: number) =>
+    api.delete(
+      `/client-management/purchases/${purchaseId}/documents/${documentId}`,
+    ),
+
+  // Purchase Statistics  
+  getStatistics: (query?: Record<string, unknown>) => {
+    const params = new URLSearchParams();
+    if (query) {
+      Object.entries(query).forEach(([key, value]) => {
+        if (value !== undefined && value !== null) {
+          params.append(key, String(value));
+        }
+      });
+    }
+    return api.get(
+      `/client-management/purchases/statistics${params.toString() ? "?" + params.toString() : ""}`,
+    );
+  },
+};
+
