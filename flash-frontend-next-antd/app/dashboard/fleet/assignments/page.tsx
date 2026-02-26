@@ -5,6 +5,8 @@ import { Table, Button, Space, Tag, Drawer, Form, Input, DatePicker, Select, mes
 import { PlusOutlined, CarOutlined, CheckCircleOutlined, ClockCircleOutlined } from '@ant-design/icons';
 import { vehicleAssignmentApi, vehicleApi, employeeApi } from '@/lib/api';
 import dayjs from 'dayjs';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 
 const { RangePicker } = DatePicker;
 
@@ -333,6 +335,17 @@ export default function VehicleAssignmentsPage() {
   const totalAssignments = currentFilteredAssignments.length;
   const activeCount = currentFilteredAssignments.filter(a => a.status === 'active').length;
   const completedCount = currentFilteredAssignments.filter(a => a.status === 'completed').length;
+  const cancelledCount = currentFilteredAssignments.filter(a => a.status === 'cancelled').length;
+
+  // Vehicle type breakdown for chart
+  const vehicleTypeMap: Record<string, number> = {};
+  currentFilteredAssignments.forEach(a => {
+    const vType = String(a.vehicle_type || 'Other');
+    vehicleTypeMap[vType] = (vehicleTypeMap[vType] || 0) + 1;
+  });
+  const vTypeLabels = Object.keys(vehicleTypeMap);
+  const vTypeCounts = Object.values(vehicleTypeMap);
+  const vTypeColors = ['#1890ff', '#52c41a', '#faad14', '#ff4d4f', '#722ed1', '#13c2c2', '#eb2f96'];
 
   return (
     <div style={{ padding: '24px' }}>
@@ -380,6 +393,43 @@ export default function VehicleAssignmentsPage() {
               value={completedCount}
               valueStyle={{ fontSize: '20px', color: '#1890ff' }}
               prefix={<ClockCircleOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Assignment Charts */}
+      <Row gutter={16} style={{ marginBottom: '24px' }}>
+        <Col xs={24} md={12}>
+          <Card title="Assignment Status">
+            <PieChart
+              data={{
+                labels: ['Active', 'Completed', 'Cancelled'],
+                datasets: [{
+                  label: 'Status',
+                  data: [activeCount, completedCount, cancelledCount],
+                  backgroundColor: ['#52c41a', '#1890ff', '#ff4d4f'],
+                  borderColor: ['#52c41a', '#1890ff', '#ff4d4f'],
+                  borderWidth: 1,
+                }],
+              }}
+              title="Status Distribution"
+            />
+          </Card>
+        </Col>
+        <Col xs={24} md={12}>
+          <Card title="Assignments by Vehicle Type">
+            <BarChart
+              data={{
+                labels: vTypeLabels,
+                datasets: [{
+                  label: 'Assignments',
+                  data: vTypeCounts,
+                  backgroundColor: vTypeColors.slice(0, vTypeLabels.length),
+                  borderRadius: 8,
+                }],
+              }}
+              title="Vehicle Type Breakdown"
             />
           </Card>
         </Col>

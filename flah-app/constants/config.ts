@@ -1,4 +1,4 @@
 
 export const CONFIG = {
-  API_BASE_URL: 'https://nizron-erp.vercel.app/api', 
+  API_BASE_URL: 'http://localhost:8000/api', 
 };

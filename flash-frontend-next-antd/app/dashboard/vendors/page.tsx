@@ -25,6 +25,8 @@ import {
 import { vendorApi } from '@/lib/api';
 
 import VendorForm from './VendorForm';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 
 const { Search } = Input;
 
@@ -199,6 +201,16 @@ export default function VendorsPage() {
   const totalVendors = filteredVendors.length;
   const inactiveVendors = totalVendors - activeVendors;
 
+  // Category breakdown for chart
+  const categoryMap: Record<string, number> = {};
+  filteredVendors.forEach(v => {
+    const cat = v.category || 'Uncategorized';
+    categoryMap[cat] = (categoryMap[cat] || 0) + 1;
+  });
+  const categoryLabels = Object.keys(categoryMap);
+  const categoryCounts = Object.values(categoryMap);
+  const categoryColors = ['#1890ff', '#52c41a', '#faad14', '#ff4d4f', '#722ed1', '#13c2c2', '#eb2f96', '#fa8c16'];
+
   return (
     <div className="p-6">
       <div className="mb-6">
@@ -231,6 +243,43 @@ export default function VendorsPage() {
                 <div className="text-2xl font-bold text-red-600">{inactiveVendors}</div>
                 <div className="text-gray-600">Inactive Vendors</div>
               </div>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Vendor Charts */}
+        <Row gutter={16} className="mb-6">
+          <Col xs={24} md={12}>
+            <Card title="Vendor Status">
+              <PieChart
+                data={{
+                  labels: ['Active', 'Inactive'],
+                  datasets: [{
+                    label: 'Vendor Status',
+                    data: [activeVendors, inactiveVendors],
+                    backgroundColor: ['#52c41a', '#ff4d4f'],
+                    borderColor: ['#52c41a', '#ff4d4f'],
+                    borderWidth: 1,
+                  }],
+                }}
+                title="Status Distribution"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card title="Vendors by Category">
+              <BarChart
+                data={{
+                  labels: categoryLabels,
+                  datasets: [{
+                    label: 'Vendors',
+                    data: categoryCounts,
+                    backgroundColor: categoryColors.slice(0, categoryLabels.length),
+                    borderRadius: 8,
+                  }],
+                }}
+                title="Category Breakdown"
+              />
             </Card>
           </Col>
         </Row>

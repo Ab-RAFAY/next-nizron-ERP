@@ -937,3 +937,45 @@ export const purchaseApi = {
   },
 };
 
+export const chatApi = {
+  // Direct admin ↔ client chat
+  getClients: () => api.get('/api/chat/clients'),
+  getDirectThreads: () => api.get('/api/chat/direct-threads'),
+  getDirectMessages: (clientId: number) =>
+    api.get(`/api/chat/direct/${clientId}/messages`),
+  sendDirectMessage: (clientId: number, message: string) =>
+    api.post(`/api/chat/direct/${clientId}/messages`, { message }),
+  markDirectRead: (clientId: number) =>
+    api.patch(`/api/chat/direct/${clientId}/read`, {}),
+  // Legacy thread-based (kept for backward compat)
+  getThreads: () => api.get('/api/chat/threads'),
+  getMessages: (threadId: number) =>
+    api.get(`/api/chat/threads/${threadId}/messages`),
+  sendMessage: (threadId: number, message: string) =>
+    api.post(`/api/chat/threads/${threadId}/messages`, { message }),
+  markReadByAdmin: (threadId: number) =>
+    api.patch(`/api/chat/threads/${threadId}/read`, {}),
+};
+
+// Client Auth API
+export const clientAuthApi = {
+  login: (email: string, password: string) =>
+    api.post<{ token: string; client_id: number; name: string; company_name: string }>(
+      '/api/auth/client-login',
+      { email, password },
+    ),
+};
+
+// Client Chat API (uses ?employeeId query param pattern)
+export const clientChatApi = {
+  getTeamMembers: () => api.get('/api/chat/team'),
+  getThread: (employeeId: number) =>
+    api.get(`/api/chat/thread?employeeId=${employeeId}`),
+  getMessages: (employeeId: number) =>
+    api.get(`/api/chat/thread/messages?employeeId=${employeeId}`),
+  sendMessage: (employeeId: number, message: string) =>
+    api.post(`/api/chat/thread/messages?employeeId=${employeeId}`, { message }),
+  markReadByClient: (employeeId: number) =>
+    api.patch(`/api/chat/thread/read?employeeId=${employeeId}`, {}),
+};
+

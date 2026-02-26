@@ -26,6 +26,8 @@ import {
 } from '@ant-design/icons';
 import { purchaseApi, vendorApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 
 import PurchaseForm from './PurchaseForm';
 
@@ -261,6 +263,20 @@ export default function PurchasesPage() {
   const completedPurchases = filteredPurchases.filter(p => p.status === 'completed').length;
   const pendingPurchases = filteredPurchases.filter(p => p.status === 'pending').length;
   const totalPurchases = filteredPurchases.length;
+  const approvedPurchases = filteredPurchases.filter(p => p.status === 'approved').length;
+  const cancelledPurchases = filteredPurchases.filter(p => p.status === 'cancelled').length;
+
+  // Vendor spending breakdown for chart
+  const vendorSpendMap: Record<string, number> = {};
+  filteredPurchases.forEach(p => {
+    const vName = p.vendor_name || 'Unknown';
+    vendorSpendMap[vName] = (vendorSpendMap[vName] || 0) + (p.amount || 0);
+  });
+  const topVendors = Object.entries(vendorSpendMap)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
+  const vendorLabels = topVendors.map(([name]) => name);
+  const vendorAmounts = topVendors.map(([, amount]) => amount);
 
   return (
     <div className="p-6">
@@ -315,6 +331,44 @@ export default function PurchasesPage() {
                 <div className="text-2xl font-bold text-purple-600">${totalAmount.toFixed(2)}</div>
                 <div className="text-gray-600">Total Value</div>
               </div>
+            </Card>
+          </Col>
+        </Row>
+
+        {/* Purchase Charts */}
+        <Row gutter={16} className="mb-6">
+          <Col xs={24} md={12}>
+            <Card title="Purchase Status Distribution">
+              <PieChart
+                data={{
+                  labels: ['Completed', 'Pending', 'Approved', 'Cancelled'],
+                  datasets: [{
+                    label: 'Purchase Status',
+                    data: [completedPurchases, pendingPurchases, approvedPurchases, cancelledPurchases],
+                    backgroundColor: ['#52c41a', '#faad14', '#1890ff', '#ff4d4f'],
+                    borderColor: ['#52c41a', '#faad14', '#1890ff', '#ff4d4f'],
+                    borderWidth: 1,
+                  }],
+                }}
+                title="Status Breakdown"
+              />
+            </Card>
+          </Col>
+          <Col xs={24} md={12}>
+            <Card title="Top Vendor Spending">
+              <BarChart
+                data={{
+                  labels: vendorLabels,
+                  datasets: [{
+                    label: 'Amount ($)',
+                    data: vendorAmounts,
+                    backgroundColor: '#1890ff',
+                    borderRadius: 8,
+                  }],
+                }}
+                title="Spending by Vendor"
+                horizontal
+              />
             </Card>
           </Col>
         </Row>

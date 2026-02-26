@@ -10,3 +10,4 @@ export * from './company-settings';
 export { client_complaints } from './clients';
 export * from './vendors';
 export * from './purchases';
+export * from './chat';

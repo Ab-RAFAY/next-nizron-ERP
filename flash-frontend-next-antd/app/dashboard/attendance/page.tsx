@@ -42,6 +42,8 @@ import {
 } from 'antd';
 import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useState } from 'react';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 
 const { TextArea } = Input;
 
@@ -66,7 +68,7 @@ const parseGPS = (locStr: string | null | undefined) => {
   return null;
 };
 
-const getOvertimeMinutes = (record: any, selectedDateStr: string) => {
+const getOvertimeMinutes = (record: Record<string, unknown>, selectedDateStr: string) => {
   if (!record.overtime_in || !record.overtime_out) {
     return record.overtime_minutes || 0;
   }
@@ -269,6 +271,7 @@ export default function AttendancePage() {
     fetchFullSheet(selectedDate);
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleViewHistory = async (employeeId: string) => {
     const emp = employees.find(e => e.employee_id === employeeId);
     setSelectedEmployee({
@@ -307,7 +310,7 @@ export default function AttendancePage() {
             const diff = checkOut.diff(checkIn, 'minute');
             if (diff > 0) totalMinutes += diff;
           }
-        } catch (e) { /* ignore parsing errors */ }
+        } catch { /* ignore parsing errors */ }
       }
     });
     return totalMinutes;
@@ -328,7 +331,7 @@ export default function AttendancePage() {
             const diff = otOut.diff(otIn, 'minute');
             if (diff > 0) totalMinutes += diff;
           }
-        } catch (e) { /* ignore parsing errors */ }
+        } catch { /* ignore parsing errors */ }
       } else if (r.overtime_minutes && r.overtime_minutes > 0) {
         // Fall back to overtime_minutes if times not set
         totalMinutes += r.overtime_minutes;
@@ -418,7 +421,7 @@ export default function AttendancePage() {
       key: 'checkbox',
       width: 30,
       align: 'center' as const,
-      render: (_: unknown, record: AttendanceRecord) => (
+      render: () => (
         <Checkbox />
       ),
     },
@@ -434,7 +437,7 @@ export default function AttendancePage() {
       },
       render: (_: unknown, record: AttendanceRecord) => {
         const emp = employees.find(e => e.employee_id === record.employee_id);
-        const fssId = (record.fss_id || (emp as any)?.fss_no) as string;
+        const fssId = (record.fss_id || (emp as Record<string, unknown>)?.fss_no) as string;
         return fssId || '-';
       },
     },
@@ -516,7 +519,7 @@ export default function AttendancePage() {
               </Tooltip>
             );
           }
-        } catch (e) { }
+        } catch { /* ignore */ }
         return '-';
       },
     },
@@ -1018,7 +1021,7 @@ export default function AttendancePage() {
           </Card>
         </Col>
         <Col xs={12} sm={6} lg={3}>
-          <Card className="summary-stat-card bg-gradient-to-r from-green-500 to-emerald-600 border-none shadow-lg rounded-2xl">
+          <Card className="summary-stat-card bg-linear-to-r from-green-500 to-emerald-600 border-none shadow-lg rounded-2xl">
             <div className="text-white">
               <div className="text-green-100 mb-1 text-sm">Total Working Hours</div>
               <div className="text-2xl font-bold flex items-center gap-2">
@@ -1029,7 +1032,7 @@ export default function AttendancePage() {
           </Card>
         </Col>
         <Col xs={12} sm={6} lg={3}>
-          <Card className="summary-stat-card bg-gradient-to-r from-orange-500 to-amber-600 border-none shadow-lg rounded-2xl">
+          <Card className="summary-stat-card bg-linear-to-r from-orange-500 to-amber-600 border-none shadow-lg rounded-2xl">
             <div className="text-white">
               <div className="text-orange-100 mb-1 text-sm">Total Overtime Hours</div>
               <div className="text-2xl font-bold flex items-center gap-2">
@@ -1050,6 +1053,43 @@ export default function AttendancePage() {
               </div>
               <div style={{ opacity: 0.2 }}><FileTextOutlined style={{ fontSize: 40 }} /></div>
             </div>
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Attendance Charts */}
+      <Row gutter={[24, 24]} className="mb-8">
+        <Col xs={24} md={12}>
+          <Card className="bg-white border-none shadow-sm rounded-2xl" title="Attendance Status Distribution">
+            <PieChart
+              data={{
+                labels: ['Present', 'Late', 'Absent', 'Leave', 'Unmarked'],
+                datasets: [{
+                  label: 'Attendance',
+                  data: [summary.present, summary.late, summary.absent, summary.leave, summary.unmarked],
+                  backgroundColor: ['#52c41a', '#faad14', '#ff4d4f', '#1890ff', '#d9d9d9'],
+                  borderColor: ['#52c41a', '#faad14', '#ff4d4f', '#1890ff', '#d9d9d9'],
+                  borderWidth: 1,
+                }],
+              }}
+              title="Today's Attendance"
+            />
+          </Card>
+        </Col>
+        <Col xs={24} md={12}>
+          <Card className="bg-white border-none shadow-sm rounded-2xl" title="Attendance Overview">
+            <BarChart
+              data={{
+                labels: ['Present', 'Late', 'Absent', 'Leave', 'Unmarked'],
+                datasets: [{
+                  label: 'Count',
+                  data: [summary.present, summary.late, summary.absent, summary.leave, summary.unmarked],
+                  backgroundColor: ['#52c41a', '#faad14', '#ff4d4f', '#1890ff', '#d9d9d9'],
+                  borderRadius: 8,
+                }],
+              }}
+              title="Status Breakdown"
+            />
           </Card>
         </Col>
       </Row>
@@ -1305,7 +1345,7 @@ export default function AttendancePage() {
                           }
                         }
                       }
-                    } catch (e) { }
+                    } catch { /* ignore */ }
                   }
                   return null;
                 }}
@@ -1460,7 +1500,7 @@ export default function AttendancePage() {
                       </Tooltip>
                     );
                   }
-                } catch (e) { }
+                } catch { /* ignore */ }
                 return '-';
               },
             },

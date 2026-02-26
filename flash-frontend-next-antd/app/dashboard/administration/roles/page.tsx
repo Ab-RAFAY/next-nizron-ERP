@@ -29,6 +29,7 @@ const MODULES = [
   { label: 'Inventory', value: 'inventory' },
   { label: 'Finance', value: 'finance' },
   { label: 'Administration', value: 'administration' },
+  { label: 'Chat', value: 'chat' },
 ];
 
 export default function RolesPage() {

@@ -23,6 +23,7 @@ import {
   AppstoreOutlined,
   BulbOutlined,
   ShoppingOutlined,
+  MessageOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
@@ -149,6 +150,12 @@ export default function DashboardLayout({
           label: 'Advances',
         },
       ],
+    },
+    {
+      key: '/dashboard/chat',
+      icon: <MessageOutlined />,
+      label: 'Chat',
+      hidden: !user.is_superuser && !user.permissions?.includes('chat'),
     },
     {
       key: 'inventory',

@@ -37,6 +37,7 @@ import { RestrictedInventoryModule } from './modules/restricted-inventory/restri
 import { UploadsModule } from './modules/uploads/uploads.module';
 import { CompanySettingsModule } from './modules/company-settings/company-settings.module';
 import { ClientPortalModule } from './modules/client-portal/client-portal.module';
+import { ChatModule } from './modules/chat/chat.module';
 
 @Module({
   imports: [
@@ -85,6 +86,7 @@ import { ClientPortalModule } from './modules/client-portal/client-portal.module
     UploadsModule,
     CompanySettingsModule,
     ClientPortalModule,
+    ChatModule,
   ],
 })
 export class AppModule {}

@@ -19,7 +19,7 @@ async function runMigration() {
     console.log('Connected to database');
 
     // Read the migration SQL file
-    const migrationPath = path.join(__dirname, '../drizzle/0003_add_vendors_purchases.sql');
+    const migrationPath = path.join(__dirname, '../drizzle/0004_add_chat.sql');
     const migrationSQL = fs.readFileSync(migrationPath, 'utf8');
 
     console.log('Running migration...');
@@ -27,11 +27,8 @@ async function runMigration() {
     
     console.log('✅ Migration completed successfully!');
     console.log('The following tables have been created:');
-    console.log('  - vendors');
-    console.log('  - vendor_contacts');
-    console.log('  - purchases');
-    console.log('  - purchase_items');
-    console.log('  - purchase_documents');
+    console.log('  - chat_threads');
+    console.log('  - chat_messages');
     
   } catch (error) {
     console.error('❌ Migration failed:', error.message);

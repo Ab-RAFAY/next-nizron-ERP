@@ -909,3 +909,37 @@ export const purchaseDocuments = pgTable("purchase_documents", {
 			name: "purchase_documents_purchase_id_purchases_id_fk"
 		}).onDelete("cascade"),
 ]);
+
+export const chatThreads = pgTable("chat_threads", {
+	id: serial().primaryKey().notNull(),
+	clientId: integer("client_id").notNull(),
+	lastMessage: text("last_message"),
+	lastMessageSender: text("last_message_sender"),
+	lastMessageAt: timestamp("last_message_at", { mode: 'string' }).defaultNow(),
+	isReadByAdmin: boolean("is_read_by_admin").default(true),
+	isReadByClient: boolean("is_read_by_client").default(true),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+	updatedAt: timestamp("updated_at", { mode: 'string' }).defaultNow(),
+}, (table) => [
+	foreignKey({
+			columns: [table.clientId],
+			foreignColumns: [clients.id],
+			name: "chat_threads_client_id_clients_id_fk"
+		}).onDelete("cascade"),
+	unique("chat_threads_client_id_unique").on(table.clientId),
+]);
+
+export const chatMessages = pgTable("chat_messages", {
+	id: serial().primaryKey().notNull(),
+	threadId: integer("thread_id").notNull(),
+	senderType: text("sender_type").notNull(),
+	senderId: integer("sender_id").notNull(),
+	message: text("message").notNull(),
+	createdAt: timestamp("created_at", { mode: 'string' }).defaultNow(),
+}, (table) => [
+	foreignKey({
+			columns: [table.threadId],
+			foreignColumns: [chatThreads.id],
+			name: "chat_messages_thread_id_chat_threads_id_fk"
+		}).onDelete("cascade"),
+]);

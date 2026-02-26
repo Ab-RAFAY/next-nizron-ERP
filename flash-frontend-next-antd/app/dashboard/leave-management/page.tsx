@@ -5,6 +5,8 @@ import { Table, Button, Space, Tag, Drawer, Form, Input, DatePicker, Select, mes
 import { PlusOutlined, CalendarOutlined, CheckCircleOutlined, ClockCircleOutlined, EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import { leaveApi, employeeApi } from '@/lib/api';
 import dayjs from 'dayjs';
+import PieChart from '@/components/charts/PieChart';
+import BarChart from '@/components/charts/BarChart';
 
 interface LeaveRecord {
   id: number;
@@ -315,6 +317,17 @@ export default function LeaveManagementPage() {
   const totalDays = filteredLeaves.reduce((sum, leave) => sum + (leave.days || 0), 0);
   const approvedCount = filteredLeaves.filter(l => l.status === 'approved').length;
   const pendingCount = filteredLeaves.filter(l => l.status === 'pending').length;
+  const rejectedCount = filteredLeaves.filter(l => l.status === 'rejected').length;
+
+  // Leave type breakdown for chart
+  const leaveTypeMap: Record<string, number> = {};
+  filteredLeaves.forEach(l => {
+    const lt = l.leave_type || 'other';
+    leaveTypeMap[lt] = (leaveTypeMap[lt] || 0) + 1;
+  });
+  const leaveTypeLabels = Object.keys(leaveTypeMap).map(k => k.charAt(0).toUpperCase() + k.slice(1));
+  const leaveTypeCounts = Object.values(leaveTypeMap);
+  const leaveTypeColors = ['#ff4d4f', '#1890ff', '#52c41a', '#faad14', '#722ed1', '#13c2c2'];
 
   return (
     <div style={{ padding: '24px' }}>
@@ -370,6 +383,43 @@ export default function LeaveManagementPage() {
               value={pendingCount}
               valueStyle={{ fontSize: '20px', color: '#faad14' }}
               prefix={<ClockCircleOutlined />}
+            />
+          </Card>
+        </Col>
+      </Row>
+
+      {/* Leave Charts */}
+      <Row gutter={16} style={{ marginBottom: '24px' }}>
+        <Col xs={24} md={12}>
+          <Card title="Leave Status Distribution">
+            <PieChart
+              data={{
+                labels: ['Approved', 'Pending', 'Rejected'],
+                datasets: [{
+                  label: 'Leave Status',
+                  data: [approvedCount, pendingCount, rejectedCount],
+                  backgroundColor: ['#52c41a', '#faad14', '#ff4d4f'],
+                  borderColor: ['#52c41a', '#faad14', '#ff4d4f'],
+                  borderWidth: 1,
+                }],
+              }}
+              title="Status Breakdown"
+            />
+          </Card>
+        </Col>
+        <Col xs={24} md={12}>
+          <Card title="Leave Type Distribution">
+            <BarChart
+              data={{
+                labels: leaveTypeLabels,
+                datasets: [{
+                  label: 'Leaves by Type',
+                  data: leaveTypeCounts,
+                  backgroundColor: leaveTypeColors.slice(0, leaveTypeLabels.length),
+                  borderRadius: 8,
+                }],
+              }}
+              title="Leave Types"
             />
           </Card>
         </Col>
