@@ -12,24 +12,38 @@ export default function ClientTabLayout() {
         try {
             const token = await AsyncStorage.getItem('token');
             if (!token) return;
-            const res = await fetch(`${CONFIG.API_BASE_URL}/chat/team`, {
-                headers: { Authorization: `Bearer ${token}` },
-            });
-            if (!res.ok) return;
-            const team = await res.json();
-            if (!Array.isArray(team)) return;
+            const headers = { Authorization: `Bearer ${token}` };
             let total = 0;
-            for (const member of team) {
-                try {
-                    const r = await fetch(`${CONFIG.API_BASE_URL}/chat/thread/messages?employeeId=${member.id}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    if (r.ok) {
-                        const data = await r.json();
-                        if (data?.thread && !data.thread.is_read_by_client) total++;
+
+            // Check direct admin thread
+            try {
+                const adminRes = await fetch(`${CONFIG.API_BASE_URL}/chat/direct/thread`, { headers });
+                if (adminRes.ok) {
+                    const adminData = await adminRes.json();
+                    const thread = adminData?.thread || adminData;
+                    if (thread && thread.is_read_by_client === false) total++;
+                }
+            } catch { /* silent */ }
+
+            // Check per-employee threads
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/chat/team`, { headers });
+                if (res.ok) {
+                    const team = await res.json();
+                    if (Array.isArray(team)) {
+                        for (const member of team) {
+                            try {
+                                const r = await fetch(`${CONFIG.API_BASE_URL}/chat/thread/messages?employeeId=${member.id}`, { headers });
+                                if (r.ok) {
+                                    const data = await r.json();
+                                    if (data?.thread && !data.thread.is_read_by_client) total++;
+                                }
+                            } catch { /* silent */ }
+                        }
                     }
-                } catch { /* silent */ }
-            }
+                }
+            } catch { /* silent */ }
+
             setUnreadCount(total);
         } catch { /* silent */ }
     }, []);

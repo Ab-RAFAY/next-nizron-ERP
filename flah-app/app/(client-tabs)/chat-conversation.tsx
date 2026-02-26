@@ -12,13 +12,13 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CONFIG } from '../../constants/config';
 
 type ChatMessage = {
     id: number;
-    sender_type: 'client' | 'user';
+    sender_type: 'client' | 'user' | 'employee';
     sender_id: number;
     message: string;
     created_at: string;
@@ -66,6 +66,13 @@ const isSameDay = (d1: string, d2: string) => {
 
 export default function ChatConversationScreen() {
     const router = useRouter();
+    const params = useLocalSearchParams<{ employeeId?: string; name?: string; role?: string }>();
+
+    // If employeeId is provided, use per-employee endpoints; otherwise use direct admin endpoints
+    const employeeId = params.employeeId ? Number(params.employeeId) : null;
+    const contactName = params.name || 'Admin';
+    const contactRole = params.role || 'Management';
+    const isAdmin = !employeeId;
 
     const [messages, setMessages] = useState<ChatMessage[]>([]);
     const [loading, setLoading] = useState(true);
@@ -81,10 +88,26 @@ export default function ChatConversationScreen() {
         };
     }, []);
 
+    // Build endpoint URLs based on whether chatting with admin or employee
+    const getMessagesUrl = useCallback(() => {
+        if (isAdmin) return `${CONFIG.API_BASE_URL}/chat/direct/messages`;
+        return `${CONFIG.API_BASE_URL}/chat/thread/messages?employeeId=${employeeId}`;
+    }, [isAdmin, employeeId]);
+
+    const getSendUrl = useCallback(() => {
+        if (isAdmin) return `${CONFIG.API_BASE_URL}/chat/direct/messages`;
+        return `${CONFIG.API_BASE_URL}/chat/thread/messages?employeeId=${employeeId}`;
+    }, [isAdmin, employeeId]);
+
+    const getReadUrl = useCallback(() => {
+        if (isAdmin) return `${CONFIG.API_BASE_URL}/chat/direct/read`;
+        return `${CONFIG.API_BASE_URL}/chat/thread/read?employeeId=${employeeId}`;
+    }, [isAdmin, employeeId]);
+
     const loadMessages = useCallback(async (silent = false) => {
         if (!silent) setLoading(true);
         try {
-            const response = await fetch(`${CONFIG.API_BASE_URL}/chat/direct/messages`, {
+            const response = await fetch(getMessagesUrl(), {
                 headers: await getAuthHeaders(),
             });
             const payload = await response.json();
@@ -105,18 +128,18 @@ export default function ChatConversationScreen() {
         } finally {
             if (!silent) setLoading(false);
         }
-    }, [getAuthHeaders]);
+    }, [getAuthHeaders, getMessagesUrl]);
 
     const markAsRead = useCallback(async () => {
         try {
-            await fetch(`${CONFIG.API_BASE_URL}/chat/direct/read`, {
+            await fetch(getReadUrl(), {
                 method: 'PATCH',
                 headers: await getAuthHeaders(),
             });
         } catch {
             /* silent */
         }
-    }, [getAuthHeaders]);
+    }, [getAuthHeaders, getReadUrl]);
 
     const sendMessage = useCallback(async () => {
         if (!draft.trim()) return;
@@ -134,7 +157,7 @@ export default function ChatConversationScreen() {
         setMessages((prev) => [...prev, optimisticMsg]);
 
         try {
-            const response = await fetch(`${CONFIG.API_BASE_URL}/chat/direct/messages`, {
+            const response = await fetch(getSendUrl(), {
                 method: 'POST',
                 headers: await getAuthHeaders(),
                 body: JSON.stringify({ message: body }),
@@ -150,7 +173,7 @@ export default function ChatConversationScreen() {
         } finally {
             setSending(false);
         }
-    }, [draft, getAuthHeaders, loadMessages]);
+    }, [draft, getAuthHeaders, getSendUrl, loadMessages]);
 
     // Initial load
     useEffect(() => {
@@ -175,6 +198,9 @@ export default function ChatConversationScreen() {
         }
     }, [messages]);
 
+    const avatarIcon = isAdmin ? 'shield-checkmark' : 'person';
+    const avatarColor = isAdmin ? '#1e293b' : '#3b82f6';
+
     const renderMessage = useCallback(
         ({ item, index }: { item: ChatMessage; index: number }) => {
             const isClient = item.sender_type === 'client';
@@ -194,13 +220,13 @@ export default function ChatConversationScreen() {
                     )}
                     <View style={isClient ? styles.msgRowRight : styles.msgRowLeft}>
                         {!isClient && (
-                            <View style={styles.msgAvatar}>
-                                <Ionicons name="shield-checkmark" size={13} color="#ffffff" />
+                            <View style={[styles.msgAvatar, { backgroundColor: avatarColor }]}>
+                                <Ionicons name={avatarIcon} size={13} color="#ffffff" />
                             </View>
                         )}
                         <View style={isClient ? styles.bubbleClient : styles.bubbleAdmin}>
                             {!isClient && (
-                                <Text style={styles.senderLabel}>Admin</Text>
+                                <Text style={styles.senderLabel}>{contactName}</Text>
                             )}
                             <Text style={styles.msgText}>{item.message}</Text>
                             <Text style={isClient ? styles.timeClient : styles.timeAdmin}>
@@ -211,7 +237,7 @@ export default function ChatConversationScreen() {
                 </View>
             );
         },
-        [messages],
+        [messages, avatarColor, avatarIcon, contactName],
     );
 
     return (
@@ -226,15 +252,15 @@ export default function ChatConversationScreen() {
                     <TouchableOpacity onPress={() => router.back()} style={styles.backBtn} activeOpacity={0.6}>
                         <Ionicons name="arrow-back" size={24} color="#ffffff" />
                     </TouchableOpacity>
-                    <View style={styles.headerAvatar}>
-                        <Ionicons name="shield-checkmark" size={18} color="#ffffff" />
+                    <View style={[styles.headerAvatar, { borderColor: isAdmin ? '#334155' : '#60a5fa' }]}>
+                        <Ionicons name={avatarIcon} size={18} color="#ffffff" />
                         <View style={styles.headerOnlineDot} />
                     </View>
                     <View style={styles.headerInfo}>
                         <Text style={styles.headerName} numberOfLines={1}>
-                            Admin
+                            {contactName}
                         </Text>
-                        <Text style={styles.headerRole}>Management</Text>
+                        <Text style={styles.headerRole}>{contactRole}</Text>
                     </View>
                     <TouchableOpacity style={styles.headerAction} activeOpacity={0.6}>
                         <Ionicons name="call-outline" size={20} color="#94a3b8" />
@@ -259,11 +285,11 @@ export default function ChatConversationScreen() {
                         }}
                         ListEmptyComponent={() => (
                             <View style={styles.emptyState}>
-                                <View style={styles.emptyAvatar}>
-                                    <Ionicons name="shield-checkmark" size={32} color="#ffffff" />
+                                <View style={[styles.emptyAvatar, { backgroundColor: avatarColor }]}>
+                                    <Ionicons name={avatarIcon} size={32} color="#ffffff" />
                                 </View>
-                                <Text style={styles.emptyName}>Admin</Text>
-                                <Text style={styles.emptyRole}>Management</Text>
+                                <Text style={styles.emptyName}>{contactName}</Text>
+                                <Text style={styles.emptyRole}>{contactRole}</Text>
                                 <Text style={styles.emptyHint}>
                                     Send a message to start the conversation
                                 </Text>
@@ -402,7 +428,6 @@ const styles = StyleSheet.create({
         borderRadius: 13,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#1e293b',
         marginBottom: 1,
     },
 

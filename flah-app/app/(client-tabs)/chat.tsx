@@ -22,8 +22,26 @@ type ThreadInfo = {
     is_read_by_client?: boolean;
 };
 
+type TeamMember = {
+    id: number;
+    employee_id: string;
+    full_name: string;
+    email: string;
+    phone: string;
+    designation: string;
+    role: string;
+};
+
+type ChatContact = {
+    type: 'admin' | 'employee';
+    employeeId?: number;
+    name: string;
+    role: string;
+    thread?: ThreadInfo | null;
+};
+
 export default function ChatScreen() {
-    const [thread, setThread] = useState<ThreadInfo | null>(null);
+    const [contacts, setContacts] = useState<ChatContact[]>([]);
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
     const router = useRouter();
@@ -36,17 +54,67 @@ export default function ChatScreen() {
         };
     }, []);
 
-    const loadThread = useCallback(async (silent = false) => {
+    const loadContacts = useCallback(async (silent = false) => {
         if (!silent) setLoading(true);
         try {
             const headers = await getAuthHeaders();
-            const response = await fetch(`${CONFIG.API_BASE_URL}/chat/direct/thread`, { headers });
-            if (response.ok) {
-                const data = await response.json();
-                if (data?.thread) {
-                    setThread(data.thread);
+
+            // Fetch admin direct thread + team members in parallel
+            const [adminRes, teamRes] = await Promise.all([
+                fetch(`${CONFIG.API_BASE_URL}/chat/direct/thread`, { headers }),
+                fetch(`${CONFIG.API_BASE_URL}/chat/team`, { headers }),
+            ]);
+
+            const contactList: ChatContact[] = [];
+
+            // Admin contact (always first)
+            let adminThread: ThreadInfo | null = null;
+            if (adminRes.ok) {
+                const adminData = await adminRes.json();
+                adminThread = adminData?.thread || adminData || null;
+            }
+            contactList.push({
+                type: 'admin',
+                name: 'Admin',
+                role: 'Management',
+                thread: adminThread,
+            });
+
+            // Team members (managers with chat permission)
+            if (teamRes.ok) {
+                const team: TeamMember[] = await teamRes.json();
+                if (Array.isArray(team) && team.length > 0) {
+                    // Fetch thread info for each team member
+                    const threadPromises = team.map(async (member) => {
+                        try {
+                            const res = await fetch(
+                                `${CONFIG.API_BASE_URL}/chat/thread/messages?employeeId=${member.id}`,
+                                { headers }
+                            );
+                            if (res.ok) {
+                                const data = await res.json();
+                                return { memberId: member.id, thread: data?.thread || null };
+                            }
+                        } catch { /* silent */ }
+                        return { memberId: member.id, thread: null };
+                    });
+
+                    const threadResults = await Promise.all(threadPromises);
+                    const threadMap = new Map(threadResults.map(r => [r.memberId, r.thread]));
+
+                    for (const member of team) {
+                        contactList.push({
+                            type: 'employee',
+                            employeeId: member.id,
+                            name: member.full_name,
+                            role: member.role || member.designation || 'Manager',
+                            thread: threadMap.get(member.id) || null,
+                        });
+                    }
                 }
             }
+
+            setContacts(contactList);
         } catch {
             /* silent */
         } finally {
@@ -56,22 +124,36 @@ export default function ChatScreen() {
     }, [getAuthHeaders]);
 
     useEffect(() => {
-        loadThread();
-    }, [loadThread]);
+        loadContacts();
+    }, [loadContacts]);
 
     // Poll for new messages every 10 seconds
     useEffect(() => {
-        const interval = setInterval(() => loadThread(true), 10000);
+        const interval = setInterval(() => loadContacts(true), 10000);
         return () => clearInterval(interval);
-    }, [loadThread]);
+    }, [loadContacts]);
 
     const onRefresh = useCallback(() => {
         setRefreshing(true);
-        loadThread(true);
-    }, [loadThread]);
+        loadContacts(true);
+    }, [loadContacts]);
 
-    const openChat = useCallback(() => {
-        router.push({ pathname: '/(client-tabs)/chat-conversation' });
+    const openChat = useCallback((contact: ChatContact) => {
+        if (contact.type === 'admin') {
+            router.push({
+                pathname: '/(client-tabs)/chat-conversation',
+                params: { name: 'Admin', role: 'Management' },
+            });
+        } else {
+            router.push({
+                pathname: '/(client-tabs)/chat-conversation',
+                params: {
+                    employeeId: String(contact.employeeId),
+                    name: contact.name,
+                    role: contact.role,
+                },
+            });
+        }
     }, [router]);
 
     const formatTime = (dateStr: string) => {
@@ -87,21 +169,27 @@ export default function ChatScreen() {
         return `${date.getDate()}/${date.getMonth() + 1}/${date.getFullYear()}`;
     };
 
-    const isUnread = thread?.is_read_by_client === false;
+    const getAvatarIcon = (contact: ChatContact): keyof typeof Ionicons.glyphMap => {
+        return contact.type === 'admin' ? 'shield-checkmark' : 'person';
+    };
+
+    const getAvatarColor = (contact: ChatContact) => {
+        return contact.type === 'admin' ? '#1e293b' : '#3b82f6';
+    };
 
     return (
         <SafeAreaView style={styles.container}>
             {/* Header */}
             <View style={styles.header}>
                 <Text style={styles.headerTitle}>Chat</Text>
-                <Text style={styles.headerSubtitle}>Contact Admin</Text>
+                <Text style={styles.headerSubtitle}>Contact Admin & Managers</Text>
             </View>
 
             {/* Info bar */}
             <View style={styles.infoBar}>
                 <Ionicons name="shield-checkmark" size={16} color="#3b82f6" />
                 <Text style={styles.infoText}>
-                    Messages are private between you and admin
+                    Messages are private between you and your contacts
                 </Text>
             </View>
 
@@ -121,46 +209,55 @@ export default function ChatScreen() {
                         />
                     }
                 >
-                    {/* Admin chat card */}
-                    <TouchableOpacity
-                        style={styles.chatCard}
-                        onPress={openChat}
-                        activeOpacity={0.6}
-                    >
-                        <View style={styles.avatar}>
-                            <Ionicons name="shield-checkmark" size={24} color="#ffffff" />
-                            <View style={styles.onlineDot} />
-                        </View>
-                        <View style={styles.chatInfo}>
-                            <View style={styles.topRow}>
-                                <Text style={[styles.chatName, isUnread && styles.unreadName]} numberOfLines={1}>
-                                    Admin
-                                </Text>
-                                {thread?.last_message_at && (
-                                    <Text style={[styles.timeText, isUnread && styles.unreadTime]}>
-                                        {formatTime(thread.last_message_at)}
-                                    </Text>
-                                )}
-                            </View>
-                            <View style={styles.bottomRow}>
-                                <Text style={[styles.lastMsg, isUnread && styles.unreadMsg]} numberOfLines={1}>
-                                    {thread?.last_message
-                                        ? `${thread.last_message_sender === 'client' ? 'You: ' : ''}${thread.last_message}`
-                                        : 'Tap to start a conversation'}
-                                </Text>
-                                {isUnread && <View style={styles.unreadDot} />}
-                            </View>
-                        </View>
-                        <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
-                    </TouchableOpacity>
+                    {contacts.map((contact) => {
+                        const isUnread = contact.thread?.is_read_by_client === false;
+                        return (
+                            <TouchableOpacity
+                                key={contact.type === 'admin' ? 'admin' : `emp-${contact.employeeId}`}
+                                style={styles.chatCard}
+                                onPress={() => openChat(contact)}
+                                activeOpacity={0.6}
+                            >
+                                <View style={[styles.avatar, { backgroundColor: getAvatarColor(contact) }]}>
+                                    <Ionicons name={getAvatarIcon(contact)} size={24} color="#ffffff" />
+                                    <View style={styles.onlineDot} />
+                                </View>
+                                <View style={styles.chatInfo}>
+                                    <View style={styles.topRow}>
+                                        <Text style={[styles.chatName, isUnread && styles.unreadName]} numberOfLines={1}>
+                                            {contact.name}
+                                        </Text>
+                                        {contact.thread?.last_message_at && (
+                                            <Text style={[styles.timeText, isUnread && styles.unreadTime]}>
+                                                {formatTime(contact.thread.last_message_at)}
+                                            </Text>
+                                        )}
+                                    </View>
+                                    <View style={styles.roleRow}>
+                                        <Text style={styles.roleText}>{contact.role}</Text>
+                                    </View>
+                                    <View style={styles.bottomRow}>
+                                        <Text style={[styles.lastMsg, isUnread && styles.unreadMsg]} numberOfLines={1}>
+                                            {contact.thread?.last_message
+                                                ? `${contact.thread.last_message_sender === 'client' ? 'You: ' : ''}${contact.thread.last_message}`
+                                                : 'Tap to start a conversation'}
+                                        </Text>
+                                        {isUnread && <View style={styles.unreadDot} />}
+                                    </View>
+                                </View>
+                                <Ionicons name="chevron-forward" size={20} color="#cbd5e1" />
+                            </TouchableOpacity>
+                        );
+                    })}
 
-                    {/* Helpful hint */}
-                    <View style={styles.hintWrap}>
-                        <Ionicons name="chatbubble-ellipses-outline" size={40} color="#e2e8f0" />
-                        <Text style={styles.hintText}>
-                            Send messages directly to admin.{'\n'}They will respond as soon as possible.
-                        </Text>
-                    </View>
+                    {contacts.length <= 1 && (
+                        <View style={styles.hintWrap}>
+                            <Ionicons name="chatbubble-ellipses-outline" size={40} color="#e2e8f0" />
+                            <Text style={styles.hintText}>
+                                Send messages directly to admin or managers.{'\n'}They will respond as soon as possible.
+                            </Text>
+                        </View>
+                    )}
                 </ScrollView>
             )}
         </SafeAreaView>
@@ -210,7 +307,7 @@ const styles = StyleSheet.create({
         flexDirection: 'row',
         alignItems: 'center',
         paddingHorizontal: 20,
-        paddingVertical: 18,
+        paddingVertical: 16,
         gap: 14,
         borderBottomWidth: 1,
         borderBottomColor: '#f1f5f9',
@@ -221,7 +318,6 @@ const styles = StyleSheet.create({
         borderRadius: 26,
         alignItems: 'center',
         justifyContent: 'center',
-        backgroundColor: '#1e293b',
         position: 'relative',
     },
     onlineDot: {
@@ -251,6 +347,14 @@ const styles = StyleSheet.create({
     },
     unreadName: {
         fontWeight: '800',
+    },
+    roleRow: {
+        marginTop: 1,
+    },
+    roleText: {
+        fontSize: 11,
+        color: '#64748b',
+        fontWeight: '500',
     },
     timeText: {
         fontSize: 11,
