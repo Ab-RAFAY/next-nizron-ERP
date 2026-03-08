@@ -7,6 +7,7 @@ import { employeeApi, attendanceApi, payrollApi, clientApi } from '@/lib/api';
 import dayjs, { Dayjs } from 'dayjs';
 import { useReactToPrint } from 'react-to-print';
 import BarChart from '@/components/charts/BarChart';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 
 interface PayrollEmployee extends Record<string, unknown> {
   id: number;
@@ -57,6 +58,7 @@ export default function PayrollPage() {
 }
 
 function PayrollContent() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const { message } = App.useApp();
   const [month, setMonth] = useState<Dayjs>(dayjs());
   const [rawEmployees, setRawEmployees] = useState<any[]>([]);
@@ -898,99 +900,34 @@ function PayrollContent() {
         </Row>
       </div>
 
-      {/* Summary Stats Cards */}
-      <div style={{ marginBottom: '32px' }}>
-        <Row gutter={[24, 24]}>
-          <Col xs={24} sm={12} xl={6}>
-            <Card style={{
-              borderRadius: '16px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              background: 'linear-gradient(to right bottom, #f0fdf4, #ffffff)',
-              border: '1px solid #dcfce7'
-            }} hoverable>
-              <Statistic
-                title={<span style={{ fontWeight: 600, color: '#166534' }}>Gross Payroll</span>}
-                value={totalGross}
-                prefix={<RiseOutlined style={{ color: '#10b981' }} />}
-                formatter={(val) => `Rs. ${val.toLocaleString()}`}
-                valueStyle={{ color: '#14532d', fontWeight: 800 }}
-              />
+      {/* Stats Drawer */}
+      <Drawer title="Payroll Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+        <Row gutter={[24, 24]} style={{ marginBottom: '24px' }}>
+          <Col xs={24} sm={12}>
+            <Card style={{ borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', background: 'linear-gradient(to right bottom, #f0fdf4, #ffffff)', border: '1px solid #dcfce7' }}>
+              <Statistic title={<span style={{ fontWeight: 600, color: '#166534' }}>Gross Payroll</span>} value={totalGross} prefix={<RiseOutlined style={{ color: '#10b981' }} />} formatter={(val) => `Rs. ${val.toLocaleString()}`} valueStyle={{ color: '#14532d', fontWeight: 800 }} />
             </Card>
           </Col>
-          <Col xs={24} sm={12} xl={6}>
-            <Card style={{
-              borderRadius: '16px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              background: 'linear-gradient(to right bottom, #eff6ff, #ffffff)',
-              border: '1px solid #dbeafe'
-            }} hoverable>
-              <Statistic
-                title={<span style={{ fontWeight: 600, color: '#1e40af' }}>Overtime Total</span>}
-                value={totalOvertime}
-                prefix={<ClockCircleOutlined style={{ color: '#3b82f6' }} />}
-                formatter={(val) => `Rs. ${val.toLocaleString()}`}
-                valueStyle={{ color: '#1e3a8a', fontWeight: 800 }}
-              />
+          <Col xs={24} sm={12}>
+            <Card style={{ borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', background: 'linear-gradient(to right bottom, #eff6ff, #ffffff)', border: '1px solid #dbeafe' }}>
+              <Statistic title={<span style={{ fontWeight: 600, color: '#1e40af' }}>Overtime Total</span>} value={totalOvertime} prefix={<ClockCircleOutlined style={{ color: '#3b82f6' }} />} formatter={(val) => `Rs. ${val.toLocaleString()}`} valueStyle={{ color: '#1e3a8a', fontWeight: 800 }} />
             </Card>
           </Col>
-          <Col xs={24} sm={12} xl={6}>
-            <Card style={{
-              borderRadius: '16px',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              background: 'linear-gradient(to right bottom, #fef2f2, #ffffff)',
-              border: '1px solid #fee2e2'
-            }} hoverable>
-              <Statistic
-                title={<span style={{ fontWeight: 600, color: '#991b1b' }}>Total Deductions</span>}
-                value={totalDeductions}
-                prefix={<FallOutlined style={{ color: '#ef4444' }} />}
-                formatter={(val) => `Rs. ${val.toLocaleString()}`}
-                valueStyle={{ color: '#7f1d1d', fontWeight: 800 }}
-              />
+          <Col xs={24} sm={12}>
+            <Card style={{ borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', background: 'linear-gradient(to right bottom, #fef2f2, #ffffff)', border: '1px solid #fee2e2' }}>
+              <Statistic title={<span style={{ fontWeight: 600, color: '#991b1b' }}>Total Deductions</span>} value={totalDeductions} prefix={<FallOutlined style={{ color: '#ef4444' }} />} formatter={(val) => `Rs. ${val.toLocaleString()}`} valueStyle={{ color: '#7f1d1d', fontWeight: 800 }} />
             </Card>
           </Col>
-          <Col xs={24} sm={12} xl={6}>
-            <Card style={{
-              borderRadius: '16px',
-              boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)',
-              background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)',
-              border: 'none'
-            }} hoverable>
-              <Statistic
-                title={<span style={{ fontWeight: 700, color: 'rgba(255,255,255,0.8)' }}>NET PAYABLE</span>}
-                value={totalNet}
-                prefix={<SafetyCertificateOutlined style={{ color: 'white' }} />}
-                formatter={(val) => `Rs. ${val.toLocaleString()}`}
-                valueStyle={{ color: 'white', fontWeight: 900, fontSize: '24px' }}
-              />
+          <Col xs={24} sm={12}>
+            <Card style={{ borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1)', background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', border: 'none' }}>
+              <Statistic title={<span style={{ fontWeight: 700, color: 'rgba(255,255,255,0.8)' }}>NET PAYABLE</span>} value={totalNet} prefix={<SafetyCertificateOutlined style={{ color: 'white' }} />} formatter={(val) => `Rs. ${val.toLocaleString()}`} valueStyle={{ color: 'white', fontWeight: 900, fontSize: '24px' }} />
             </Card>
           </Col>
         </Row>
-      </div>
-
-      {/* Payroll Insights Section */}
-      <Row gutter={[24, 24]} style={{ marginBottom: '32px' }}>
-        <Col xs={24}>
-          <Card title="Net Payable by Client" bordered={false} style={{ borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
-            <BarChart
-              horizontal
-              data={{
-                labels: Array.from(new Set(clientSummaryData.map(c => c.clientName))),
-                datasets: [
-                  {
-                    label: 'Net Payable (Rs.)',
-                    data: Array.from(new Set(clientSummaryData.map(c => c.clientName))).map(name =>
-                      clientSummaryData.filter(c => c.clientName === name).reduce((sum, c) => sum + c.currentAmount, 0)
-                    ),
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 4,
-                  }
-                ]
-              }}
-            />
-          </Card>
-        </Col>
-      </Row>
+        <Card title="Net Payable by Client" bordered={false} style={{ borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)' }}>
+          <BarChart horizontal data={{ labels: Array.from(new Set(clientSummaryData.map(c => c.clientName))), datasets: [{ label: 'Net Payable (Rs.)', data: Array.from(new Set(clientSummaryData.map(c => c.clientName))).map(name => clientSummaryData.filter(c => c.clientName === name).reduce((sum, c) => sum + c.currentAmount, 0)), backgroundColor: '#3b82f6', borderRadius: 4 }] }} />
+        </Card>
+      </Drawer>
 
       {/* Main Table Controls */}
       <div style={{ marginBottom: '24px', display: 'flex', gap: '16px', alignItems: 'center' }}>

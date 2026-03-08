@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Card, Row, Col, Statistic, Table, Tag } from 'antd';
+import { Card, Row, Col, Statistic, Table, Tag, Drawer } from 'antd';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 import {
   UserOutlined,
   CarOutlined,
@@ -20,6 +21,7 @@ import PieChart from '@/components/charts/PieChart';
 import BarChart from '@/components/charts/BarChart';
 
 export default function DashboardHome() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const [stats, setStats] = useState({
     totalEmployees: 0,
     activeEmployees: 0,
@@ -184,146 +186,61 @@ export default function DashboardHome() {
     <div style={{ padding: '24px' }}>
       <h2 style={{ marginBottom: '24px', fontSize: '24px', fontWeight: 600 }}>Dashboard Overview</h2>
 
-      {/* Main Statistics */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Card loading={loading}>
-            <Statistic
-              title={<span style={{ fontSize: '13px' }}>Total Employees</span>}
-              value={stats.totalEmployees}
-              valueStyle={{ fontSize: '24px', color: '#1890ff' }}
-              prefix={<UserOutlined />}
-            />
-            <div style={{ marginTop: '8px', fontSize: '12px', color: '#52c41a' }}>
-              {stats.activeEmployees} Active
-            </div>
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Card loading={loading}>
-            <Statistic
-              title={<span style={{ fontSize: '13px' }}>Total Vehicles</span>}
-              value={stats.totalVehicles}
-              valueStyle={{ fontSize: '24px', color: '#722ed1' }}
-              prefix={<CarOutlined />}
-            />
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Card loading={loading}>
-            <Statistic
-              title={<span style={{ fontSize: '13px' }}>Total Clients</span>}
-              value={stats.totalClients}
-              valueStyle={{ fontSize: '24px', color: '#13c2c2' }}
-              prefix={<TeamOutlined />}
-            />
-          </Card>
-        </Col>
-
-        <Col xs={24} sm={12} md={8} lg={6}>
-          <Card loading={loading}>
-            <Statistic
-              title={<span style={{ fontSize: '13px' }}>Monthly Expenses</span>}
-              value={stats.monthlyExpenses}
-              valueStyle={{ fontSize: '24px', color: '#ff4d4f' }}
-              prefix={<DollarOutlined />}
-              suffix="Rs."
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Today's Attendance */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-        <Col xs={24} md={12}>
-          <Card title="Today's Attendance" loading={loading}>
+      {/* Stats Drawer */}
+      <Drawer title="Dashboard Statistics" placement="right" width={720} open={statsOpen} onClose={closeStats}>
+        <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
+          <Col xs={24} sm={12}>
+            <Card loading={loading}>
+              <Statistic title={<span style={{ fontSize: '13px' }}>Total Employees</span>} value={stats.totalEmployees} valueStyle={{ fontSize: '24px', color: '#1890ff' }} prefix={<UserOutlined />} />
+              <div style={{ marginTop: '8px', fontSize: '12px', color: '#52c41a' }}>{stats.activeEmployees} Active</div>
+            </Card>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Card loading={loading}>
+              <Statistic title={<span style={{ fontSize: '13px' }}>Total Vehicles</span>} value={stats.totalVehicles} valueStyle={{ fontSize: '24px', color: '#722ed1' }} prefix={<CarOutlined />} />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Card loading={loading}>
+              <Statistic title={<span style={{ fontSize: '13px' }}>Total Clients</span>} value={stats.totalClients} valueStyle={{ fontSize: '24px', color: '#13c2c2' }} prefix={<TeamOutlined />} />
+            </Card>
+          </Col>
+          <Col xs={24} sm={12}>
+            <Card loading={loading}>
+              <Statistic title={<span style={{ fontSize: '13px' }}>Monthly Expenses</span>} value={stats.monthlyExpenses} valueStyle={{ fontSize: '24px', color: '#ff4d4f' }} prefix={<DollarOutlined />} suffix="Rs." />
+            </Card>
+          </Col>
+        </Row>
+        <Card title="Today's Attendance" loading={loading} style={{ marginBottom: '16px' }}>
+          <Row gutter={16}>
+            <Col span={12}><Statistic title="Present" value={stats.todayPresent} valueStyle={{ fontSize: '28px', color: '#52c41a' }} prefix={<CheckCircleOutlined />} /></Col>
+            <Col span={12}><Statistic title="Absent" value={stats.todayAbsent} valueStyle={{ fontSize: '28px', color: '#ff4d4f' }} prefix={<ClockCircleOutlined />} /></Col>
+          </Row>
+        </Card>
+        <Card title="Alerts & Notifications" loading={loading} style={{ marginBottom: '16px' }}>
+          <Row gutter={16}>
+            <Col span={12}><Statistic title="Active Advances" value={stats.activeAdvances} valueStyle={{ fontSize: '28px', color: '#faad14' }} prefix={<WarningOutlined />} /></Col>
+            <Col span={12}><Statistic title="Low Stock Items" value={stats.lowStockItems} valueStyle={{ fontSize: '28px', color: '#ff4d4f' }} prefix={<InboxOutlined />} /></Col>
+          </Row>
+        </Card>
+        <Card title="Attendance Overview (Today)" loading={loading} style={{ marginBottom: '16px' }}>
+          <PieChart data={{ labels: ['Present', 'Absent'], datasets: [{ label: 'Attendance', data: [stats.todayPresent, stats.todayAbsent], backgroundColor: ['#52c41a', '#ff4d4f'], borderColor: ['#fff', '#fff'], borderWidth: 2 }] }} />
+        </Card>
+        <Card title="Financial Overview (Monthly)" loading={loading} style={{ marginBottom: '16px' }}>
+          <BarChart data={{ labels: ['Income', 'Expenses'], datasets: [{ label: 'Amount (Rs.)', data: [stats.monthlyIncome, stats.monthlyExpenses], backgroundColor: ['#52c41a', '#ff4d4f'], borderRadius: 6 }] }} />
+        </Card>
+        <Card>
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <h3 style={{ fontSize: '18px', marginBottom: '16px' }}>System Status</h3>
             <Row gutter={16}>
-              <Col span={12}>
-                <Statistic
-                  title="Present"
-                  value={stats.todayPresent}
-                  valueStyle={{ fontSize: '28px', color: '#52c41a' }}
-                  prefix={<CheckCircleOutlined />}
-                />
-              </Col>
-              <Col span={12}>
-                <Statistic
-                  title="Absent"
-                  value={stats.todayAbsent}
-                  valueStyle={{ fontSize: '28px', color: '#ff4d4f' }}
-                  prefix={<ClockCircleOutlined />}
-                />
-              </Col>
+              <Col span={6}><div style={{ fontSize: '32px', fontWeight: 600, color: '#1890ff' }}>{stats.totalEmployees}</div><div style={{ fontSize: '12px', color: '#666' }}>Employees</div></Col>
+              <Col span={6}><div style={{ fontSize: '32px', fontWeight: 600, color: '#722ed1' }}>{stats.totalVehicles}</div><div style={{ fontSize: '12px', color: '#666' }}>Vehicles</div></Col>
+              <Col span={6}><div style={{ fontSize: '32px', fontWeight: 600, color: '#13c2c2' }}>{stats.totalClients}</div><div style={{ fontSize: '12px', color: '#666' }}>Clients</div></Col>
+              <Col span={6}><div style={{ fontSize: '32px', fontWeight: 600, color: '#52c41a' }}>{stats.todayPresent}</div><div style={{ fontSize: '12px', color: '#666' }}>Present Today</div></Col>
             </Row>
-          </Card>
-        </Col>
-
-        <Col xs={24} md={12}>
-          <Card title="Alerts & Notifications" loading={loading}>
-            <Row gutter={16}>
-              <Col span={12}>
-                <Statistic
-                  title="Active Advances"
-                  value={stats.activeAdvances}
-                  valueStyle={{ fontSize: '28px', color: '#faad14' }}
-                  prefix={<WarningOutlined />}
-                />
-              </Col>
-              <Col span={12}>
-                <Statistic
-                  title="Low Stock Items"
-                  value={stats.lowStockItems}
-                  valueStyle={{ fontSize: '28px', color: '#ff4d4f' }}
-                  prefix={<InboxOutlined />}
-                />
-              </Col>
-            </Row>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Financial Overview */}
-      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-        <Col xs={24} lg={12}>
-          <Card title="Attendance Overview (Today)" loading={loading} style={{ height: '100%' }}>
-            <PieChart
-              data={{
-                labels: ['Present', 'Absent'],
-                datasets: [
-                  {
-                    label: 'Attendance',
-                    data: [stats.todayPresent, stats.todayAbsent],
-                    backgroundColor: ['#52c41a', '#ff4d4f'],
-                    borderColor: ['#fff', '#fff'],
-                    borderWidth: 2,
-                  },
-                ],
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Financial Overview (Monthly)" loading={loading} style={{ height: '100%' }}>
-            <BarChart
-              data={{
-                labels: ['Income', 'Expenses'],
-                datasets: [
-                  {
-                    label: 'Amount (Rs.)',
-                    data: [stats.monthlyIncome, stats.monthlyExpenses],
-                    backgroundColor: ['#52c41a', '#ff4d4f'],
-                    borderRadius: 6,
-                  },
-                ],
-              }}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Financial Overview Stats */}
+          </div>
+        </Card>
+      </Drawer>
 
       {/* Recent Activities */}
       <Row gutter={[16, 16]}>
@@ -341,34 +258,7 @@ export default function DashboardHome() {
         </Col>
       </Row>
 
-      {/* Quick Stats Summary */}
-      <Row gutter={[16, 16]} style={{ marginTop: '24px' }}>
-        <Col xs={24}>
-          <Card>
-            <div style={{ textAlign: 'center', padding: '20px' }}>
-              <h3 style={{ fontSize: '18px', marginBottom: '16px' }}>System Status</h3>
-              <Row gutter={16}>
-                <Col span={6}>
-                  <div style={{ fontSize: '32px', fontWeight: 600, color: '#1890ff' }}>{stats.totalEmployees}</div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>Employees</div>
-                </Col>
-                <Col span={6}>
-                  <div style={{ fontSize: '32px', fontWeight: 600, color: '#722ed1' }}>{stats.totalVehicles}</div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>Vehicles</div>
-                </Col>
-                <Col span={6}>
-                  <div style={{ fontSize: '32px', fontWeight: 600, color: '#13c2c2' }}>{stats.totalClients}</div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>Clients</div>
-                </Col>
-                <Col span={6}>
-                  <div style={{ fontSize: '32px', fontWeight: 600, color: '#52c41a' }}>{stats.todayPresent}</div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>Present Today</div>
-                </Col>
-              </Row>
-            </div>
-          </Card>
-        </Col>
-      </Row>
+
     </div>
   );
 }

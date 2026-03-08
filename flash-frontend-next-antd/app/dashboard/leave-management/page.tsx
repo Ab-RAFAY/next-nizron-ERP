@@ -7,6 +7,7 @@ import { leaveApi, employeeApi } from '@/lib/api';
 import dayjs from 'dayjs';
 import PieChart from '@/components/charts/PieChart';
 import BarChart from '@/components/charts/BarChart';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 
 interface LeaveRecord {
   id: number;
@@ -22,6 +23,7 @@ interface LeaveRecord {
 }
 
 export default function LeaveManagementPage() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const [leaves, setLeaves] = useState<LeaveRecord[]>([]);
   const [employees, setEmployees] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
@@ -346,84 +348,21 @@ export default function LeaveManagementPage() {
         </Space>
       </div>
 
-      <Row gutter={16} style={{ marginBottom: '24px' }}>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Total Leaves</span>}
-              value={totalLeaves}
-              valueStyle={{ fontSize: '20px' }}
-              prefix={<CalendarOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Total Days</span>}
-              value={totalDays}
-              valueStyle={{ fontSize: '20px', color: '#1890ff' }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Approved</span>}
-              value={approvedCount}
-              valueStyle={{ fontSize: '20px', color: '#52c41a' }}
-              prefix={<CheckCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Pending</span>}
-              value={pendingCount}
-              valueStyle={{ fontSize: '20px', color: '#faad14' }}
-              prefix={<ClockCircleOutlined />}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Leave Charts */}
-      <Row gutter={16} style={{ marginBottom: '24px' }}>
-        <Col xs={24} md={12}>
-          <Card title="Leave Status Distribution">
-            <PieChart
-              data={{
-                labels: ['Approved', 'Pending', 'Rejected'],
-                datasets: [{
-                  label: 'Leave Status',
-                  data: [approvedCount, pendingCount, rejectedCount],
-                  backgroundColor: ['#52c41a', '#faad14', '#ff4d4f'],
-                  borderColor: ['#52c41a', '#faad14', '#ff4d4f'],
-                  borderWidth: 1,
-                }],
-              }}
-              title="Status Breakdown"
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={12}>
-          <Card title="Leave Type Distribution">
-            <BarChart
-              data={{
-                labels: leaveTypeLabels,
-                datasets: [{
-                  label: 'Leaves by Type',
-                  data: leaveTypeCounts,
-                  backgroundColor: leaveTypeColors.slice(0, leaveTypeLabels.length),
-                  borderRadius: 8,
-                }],
-              }}
-              title="Leave Types"
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* Stats Drawer */}
+      <Drawer title="Leave Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+        <Row gutter={16} style={{ marginBottom: '24px' }}>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Leaves</span>} value={totalLeaves} valueStyle={{ fontSize: '20px' }} prefix={<CalendarOutlined />} /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Days</span>} value={totalDays} valueStyle={{ fontSize: '20px', color: '#1890ff' }} /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Approved</span>} value={approvedCount} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix={<CheckCircleOutlined />} /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Pending</span>} value={pendingCount} valueStyle={{ fontSize: '20px', color: '#faad14' }} prefix={<ClockCircleOutlined />} /></Card></Col>
+        </Row>
+        <Card title="Leave Status Distribution" style={{ marginBottom: '16px' }}>
+          <PieChart data={{ labels: ['Approved', 'Pending', 'Rejected'], datasets: [{ label: 'Leave Status', data: [approvedCount, pendingCount, rejectedCount], backgroundColor: ['#52c41a', '#faad14', '#ff4d4f'], borderColor: ['#52c41a', '#faad14', '#ff4d4f'], borderWidth: 1 }] }} title="Status Breakdown" />
+        </Card>
+        <Card title="Leave Type Distribution">
+          <BarChart data={{ labels: leaveTypeLabels, datasets: [{ label: 'Leaves by Type', data: leaveTypeCounts, backgroundColor: leaveTypeColors.slice(0, leaveTypeLabels.length), borderRadius: 8 }] }} title="Leave Types" />
+        </Card>
+      </Drawer>
 
       <Table
         columns={columns}

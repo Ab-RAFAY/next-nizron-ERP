@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
-  output: "standalone", // ADD THIS LINE
+  output: "standalone", 
 };
 
 export default nextConfig;

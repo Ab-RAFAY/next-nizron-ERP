@@ -28,6 +28,7 @@ import { purchaseApi, vendorApi } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import PieChart from '@/components/charts/PieChart';
 import BarChart from '@/components/charts/BarChart';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 
 import PurchaseForm from './PurchaseForm';
 
@@ -52,6 +53,7 @@ interface Vendor {
 }
 
 export default function PurchasesPage() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const router = useRouter();
   const { user } = useAuth();
   const { message } = App.useApp();
@@ -300,78 +302,20 @@ export default function PurchasesPage() {
         )}
         
         {/* Statistics Cards */}
-        <Row gutter={16} className="mb-6">
-          <Col xs={24} sm={12} md={6}>
-            <Card>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{totalPurchases}</div>
-                <div className="text-gray-600">Total Purchases</div>
-              </div>
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={6}>
-            <Card>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{completedPurchases}</div>
-                <div className="text-gray-600">Completed</div>
-              </div>
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={6}>
-            <Card>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-orange-600">{pendingPurchases}</div>
-                <div className="text-gray-600">Pending</div>
-              </div>
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={6}>
-            <Card>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-purple-600">${totalAmount.toFixed(2)}</div>
-                <div className="text-gray-600">Total Value</div>
-              </div>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Purchase Charts */}
-        <Row gutter={16} className="mb-6">
-          <Col xs={24} md={12}>
-            <Card title="Purchase Status Distribution">
-              <PieChart
-                data={{
-                  labels: ['Completed', 'Pending', 'Approved', 'Cancelled'],
-                  datasets: [{
-                    label: 'Purchase Status',
-                    data: [completedPurchases, pendingPurchases, approvedPurchases, cancelledPurchases],
-                    backgroundColor: ['#52c41a', '#faad14', '#1890ff', '#ff4d4f'],
-                    borderColor: ['#52c41a', '#faad14', '#1890ff', '#ff4d4f'],
-                    borderWidth: 1,
-                  }],
-                }}
-                title="Status Breakdown"
-              />
-            </Card>
-          </Col>
-          <Col xs={24} md={12}>
-            <Card title="Top Vendor Spending">
-              <BarChart
-                data={{
-                  labels: vendorLabels,
-                  datasets: [{
-                    label: 'Amount ($)',
-                    data: vendorAmounts,
-                    backgroundColor: '#1890ff',
-                    borderRadius: 8,
-                  }],
-                }}
-                title="Spending by Vendor"
-                horizontal
-              />
-            </Card>
-          </Col>
-        </Row>
+        <Drawer title="Purchase Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+          <Row gutter={16} className="mb-6">
+            <Col xs={24} sm={12}><Card><div className="text-center"><div className="text-2xl font-bold text-blue-600">{totalPurchases}</div><div className="text-gray-600">Total Purchases</div></div></Card></Col>
+            <Col xs={24} sm={12}><Card><div className="text-center"><div className="text-2xl font-bold text-green-600">{completedPurchases}</div><div className="text-gray-600">Completed</div></div></Card></Col>
+            <Col xs={24} sm={12}><Card><div className="text-center"><div className="text-2xl font-bold text-orange-600">{pendingPurchases}</div><div className="text-gray-600">Pending</div></div></Card></Col>
+            <Col xs={24} sm={12}><Card><div className="text-center"><div className="text-2xl font-bold text-purple-600">${totalAmount.toFixed(2)}</div><div className="text-gray-600">Total Value</div></div></Card></Col>
+          </Row>
+          <Card title="Purchase Status Distribution" style={{ marginBottom: '16px' }}>
+            <PieChart data={{ labels: ['Completed', 'Pending', 'Approved', 'Cancelled'], datasets: [{ label: 'Purchase Status', data: [completedPurchases, pendingPurchases, approvedPurchases, cancelledPurchases], backgroundColor: ['#52c41a', '#faad14', '#1890ff', '#ff4d4f'], borderColor: ['#52c41a', '#faad14', '#1890ff', '#ff4d4f'], borderWidth: 1 }] }} title="Status Breakdown" />
+          </Card>
+          <Card title="Top Vendor Spending">
+            <BarChart data={{ labels: vendorLabels, datasets: [{ label: 'Amount ($)', data: vendorAmounts, backgroundColor: '#1890ff', borderRadius: 8 }] }} title="Spending by Vendor" horizontal />
+          </Card>
+        </Drawer>
 
         <div className="flex justify-between items-center">
           <Space>

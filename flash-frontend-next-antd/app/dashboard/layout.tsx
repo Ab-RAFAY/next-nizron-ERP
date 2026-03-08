@@ -26,7 +26,9 @@ import {
   MessageOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
+import { BarChartOutlined } from '@ant-design/icons';
 import { useAuth } from '@/lib/auth';
+import { StatsDrawerProvider, useStatsDrawer } from '@/lib/stats-drawer-context';
 import type { MenuProps } from 'antd';
 
 const { Header, Sider, Content } = Layout;
@@ -36,10 +38,23 @@ export default function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
+  return (
+    <StatsDrawerProvider>
+      <DashboardLayoutInner>{children}</DashboardLayoutInner>
+    </StatsDrawerProvider>
+  );
+}
+
+function DashboardLayoutInner({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
   const { user, logout, loading } = useAuth();
+  const { toggleStats } = useStatsDrawer();
 
   useEffect(() => {
     if (!loading && !user) {
@@ -279,6 +294,14 @@ export default function DashboardLayout({
             className="text-lg"
           />
           <Space size="large">
+            <Button
+              type="primary"
+              icon={<BarChartOutlined />}
+              onClick={toggleStats}
+              style={{ borderRadius: '8px' }}
+            >
+              Show Stats
+            </Button>
             <Badge count={0} showZero={false}>
               <Button type="text" icon={<BellOutlined style={{ fontSize: '18px' }} />} />
             </Badge>

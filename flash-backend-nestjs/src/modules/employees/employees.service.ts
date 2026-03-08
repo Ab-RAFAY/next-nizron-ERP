@@ -88,12 +88,12 @@ export class EmployeesService {
     const finalFilter = filters.length > 0 ? and(...filters) : undefined;
 
     // Sorting logic
-    let orderBy: any = desc(sql`NULLIF(REGEXP_REPLACE(${schema.employees.fss_no}, '[^0-9]', '', 'g'), '')::INTEGER`); // Default sort: numeric fss_no desc
+    let orderBy: any = desc(sql`NULLIF(REGEXP_REPLACE(${schema.employees.fss_no}, '[^0-9]', '', 'g'), '')::BIGINT`); // Default sort: numeric fss_no desc
     
     if (query.sort_by) {
       if (query.sort_by === 'fss_no') {
         const order = query.sort_order === 'asc' ? 'ASC' : 'DESC';
-        orderBy = sql`NULLIF(REGEXP_REPLACE(${schema.employees.fss_no}, '[^0-9]', '', 'g'), '')::INTEGER ${sql.raw(order)}`;
+        orderBy = sql`NULLIF(REGEXP_REPLACE(${schema.employees.fss_no}, '[^0-9]', '', 'g'), '')::BIGINT ${sql.raw(order)}`;
       } else {
         const field = schema.employees[query.sort_by as keyof typeof schema.employees];
         if (field) {

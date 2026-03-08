@@ -25,6 +25,7 @@ import IndustriesModal from './IndustriesModal';
 import PieChart from '@/components/charts/PieChart';
 import BarChart from '@/components/charts/BarChart';
 import { Card, Row, Col } from 'antd';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 
 const { Search } = Input;
 
@@ -40,6 +41,7 @@ interface Client extends Record<string, unknown> {
 }
 
 export default function ClientsPage() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const router = useRouter();
   const [clients, setClients] = useState<Client[]>([]);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
@@ -222,50 +224,15 @@ export default function ClientsPage() {
         </Space>
       </div>
 
-      <Row gutter={[16, 16]} className="mb-6">
-        <Col xs={24} lg={12}>
-          <Card title="Industry Distribution" bordered={false} className="shadow-sm">
-            <PieChart
-              data={{
-                labels: Array.from(new Set(clients.map(c => c.industry || 'Unknown'))),
-                datasets: [
-                  {
-                    label: 'Clients',
-                    data: Array.from(new Set(clients.map(c => c.industry || 'Unknown'))).map(ind =>
-                      clients.filter(c => (c.industry || 'Unknown') === ind).length
-                    ),
-                    backgroundColor: ['#1890ff', '#722ed1', '#13c2c2', '#faad14', '#52c41a', '#ff4d4f'],
-                    borderColor: ['#fff'],
-                    borderWidth: 2,
-                  },
-                ],
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Client Status" bordered={false} className="shadow-sm">
-            <PieChart
-              data={{
-                labels: ['Active', 'Inactive', 'Other'],
-                datasets: [
-                  {
-                    label: 'Status',
-                    data: [
-                      clients.filter(c => String(c.status).toLowerCase() === 'active').length,
-                      clients.filter(c => String(c.status).toLowerCase() === 'inactive').length,
-                      clients.filter(c => !['active', 'inactive'].includes(String(c.status).toLowerCase())).length,
-                    ],
-                    backgroundColor: ['#52c41a', '#ff4d4f', '#faad14'],
-                    borderColor: ['#fff'],
-                    borderWidth: 2,
-                  },
-                ],
-              }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* Stats Drawer */}
+      <Drawer title="Client Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+        <Card title="Industry Distribution" bordered={false} className="shadow-sm" style={{ marginBottom: '16px' }}>
+          <PieChart data={{ labels: Array.from(new Set(clients.map(c => c.industry || 'Unknown'))), datasets: [{ label: 'Clients', data: Array.from(new Set(clients.map(c => c.industry || 'Unknown'))).map(ind => clients.filter(c => (c.industry || 'Unknown') === ind).length), backgroundColor: ['#1890ff', '#722ed1', '#13c2c2', '#faad14', '#52c41a', '#ff4d4f'], borderColor: ['#fff'], borderWidth: 2 }] }} />
+        </Card>
+        <Card title="Client Status" bordered={false} className="shadow-sm">
+          <PieChart data={{ labels: ['Active', 'Inactive', 'Other'], datasets: [{ label: 'Status', data: [clients.filter(c => String(c.status).toLowerCase() === 'active').length, clients.filter(c => String(c.status).toLowerCase() === 'inactive').length, clients.filter(c => !['active', 'inactive'].includes(String(c.status).toLowerCase())).length], backgroundColor: ['#52c41a', '#ff4d4f', '#faad14'], borderColor: ['#fff'], borderWidth: 2 }] }} />
+        </Card>
+      </Drawer>
 
       <div className="mb-4">
         <Search

@@ -7,10 +7,12 @@ import { vehicleAssignmentApi, vehicleApi, employeeApi } from '@/lib/api';
 import dayjs from 'dayjs';
 import PieChart from '@/components/charts/PieChart';
 import BarChart from '@/components/charts/BarChart';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 
 const { RangePicker } = DatePicker;
 
 export default function VehicleAssignmentsPage() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const [assignments, setAssignments] = useState<Record<string, unknown>[]>([]);
   const [vehicles, setVehicles] = useState<Record<string, unknown>[]>([]);
   const [employees, setEmployees] = useState<Record<string, unknown>[]>([]);
@@ -365,75 +367,20 @@ export default function VehicleAssignmentsPage() {
         </Space>
       </div>
 
-      <Row gutter={16} style={{ marginBottom: '24px' }}>
-        <Col span={8}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Total Assignments</span>}
-              value={totalAssignments}
-              valueStyle={{ fontSize: '20px' }}
-              prefix={<CarOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Active</span>}
-              value={activeCount}
-              valueStyle={{ fontSize: '20px', color: '#52c41a' }}
-              prefix={<CheckCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={8}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Completed</span>}
-              value={completedCount}
-              valueStyle={{ fontSize: '20px', color: '#1890ff' }}
-              prefix={<ClockCircleOutlined />}
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Assignment Charts */}
-      <Row gutter={16} style={{ marginBottom: '24px' }}>
-        <Col xs={24} md={12}>
-          <Card title="Assignment Status">
-            <PieChart
-              data={{
-                labels: ['Active', 'Completed', 'Cancelled'],
-                datasets: [{
-                  label: 'Status',
-                  data: [activeCount, completedCount, cancelledCount],
-                  backgroundColor: ['#52c41a', '#1890ff', '#ff4d4f'],
-                  borderColor: ['#52c41a', '#1890ff', '#ff4d4f'],
-                  borderWidth: 1,
-                }],
-              }}
-              title="Status Distribution"
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={12}>
-          <Card title="Assignments by Vehicle Type">
-            <BarChart
-              data={{
-                labels: vTypeLabels,
-                datasets: [{
-                  label: 'Assignments',
-                  data: vTypeCounts,
-                  backgroundColor: vTypeColors.slice(0, vTypeLabels.length),
-                  borderRadius: 8,
-                }],
-              }}
-              title="Vehicle Type Breakdown"
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* Stats Drawer */}
+      <Drawer title="Assignment Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+        <Row gutter={16} style={{ marginBottom: '24px' }}>
+          <Col span={8}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Assignments</span>} value={totalAssignments} valueStyle={{ fontSize: '20px' }} prefix={<CarOutlined />} /></Card></Col>
+          <Col span={8}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Active</span>} value={activeCount} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix={<CheckCircleOutlined />} /></Card></Col>
+          <Col span={8}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Completed</span>} value={completedCount} valueStyle={{ fontSize: '20px', color: '#1890ff' }} prefix={<ClockCircleOutlined />} /></Card></Col>
+        </Row>
+        <Card title="Assignment Status" style={{ marginBottom: '16px' }}>
+          <PieChart data={{ labels: ['Active', 'Completed', 'Cancelled'], datasets: [{ label: 'Status', data: [activeCount, completedCount, cancelledCount], backgroundColor: ['#52c41a', '#1890ff', '#ff4d4f'], borderColor: ['#52c41a', '#1890ff', '#ff4d4f'], borderWidth: 1 }] }} title="Status Distribution" />
+        </Card>
+        <Card title="Assignments by Vehicle Type">
+          <BarChart data={{ labels: vTypeLabels, datasets: [{ label: 'Assignments', data: vTypeCounts, backgroundColor: vTypeColors.slice(0, vTypeLabels.length), borderRadius: 8 }] }} title="Vehicle Type Breakdown" />
+        </Card>
+      </Drawer>
 
       <Table
         columns={columns}

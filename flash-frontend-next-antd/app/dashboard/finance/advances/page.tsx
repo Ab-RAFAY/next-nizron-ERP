@@ -6,9 +6,11 @@ import { PlusOutlined, DollarOutlined, CheckCircleOutlined, ClockCircleOutlined,
 import { advancesApi, employeeApi } from '@/lib/api';
 import PieChart from '@/components/charts/PieChart';
 import BarChart from '@/components/charts/BarChart';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 import dayjs from 'dayjs';
 
 export default function AdvancesPage() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const [advances, setAdvances] = useState<Record<string, unknown>[]>([]);
   const [deductions, setDeductions] = useState<Record<string, unknown>[]>([]);
   const [employees, setEmployees] = useState<Record<string, unknown>[]>([]);
@@ -210,92 +212,21 @@ export default function AdvancesPage() {
         </Space>
       </div>
 
-      <Row gutter={16} style={{ marginBottom: '24px' }}>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Total Advances</span>}
-              value={totalAdvances}
-              valueStyle={{ fontSize: '20px', color: '#ff4d4f' }}
-              prefix={<DollarOutlined />}
-              suffix="Rs."
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Active Advances</span>}
-              value={activeAdvances}
-              valueStyle={{ fontSize: '20px', color: '#faad14' }}
-              prefix={<ClockCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Completed</span>}
-              value={completedAdvances}
-              valueStyle={{ fontSize: '20px', color: '#52c41a' }}
-              prefix={<CheckCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Total Deductions</span>}
-              value={totalDeductions}
-              valueStyle={{ fontSize: '20px', color: '#1890ff' }}
-              prefix={<WarningOutlined />}
-              suffix="Rs."
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-        <Col xs={24} lg={12}>
-          <Card title="Advance Status Distribution" bordered={false} className="shadow-sm">
-            <PieChart
-              data={{
-                labels: Array.from(new Set(filteredAdvances.map(a => String(a.status || 'pending')))),
-                datasets: [
-                  {
-                    label: 'Advances',
-                    data: Array.from(new Set(filteredAdvances.map(a => String(a.status || 'pending')))).map(status =>
-                      filteredAdvances.filter(a => String(a.status || 'pending') === status).length
-                    ),
-                    backgroundColor: ['#faad14', '#1890ff', '#52c41a', '#8c8c8c', '#ff4d4f'],
-                    borderColor: ['#fff'],
-                    borderWidth: 2,
-                  },
-                ],
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Monthly Advances Tracking" bordered={false} className="shadow-sm">
-            <BarChart
-              data={{
-                labels: Array.from(new Set(filteredAdvances.map(a => dayjs(String(a.date)).format('MMM YYYY')))).reverse(),
-                datasets: [
-                  {
-                    label: 'Amount (Rs.)',
-                    data: Array.from(new Set(filteredAdvances.map(a => dayjs(String(a.date)).format('MMM YYYY')))).reverse().map(month =>
-                      filteredAdvances.filter(a => dayjs(String(a.date)).format('MMM YYYY') === month).reduce((sum, a) => sum + Number(a.amount || 0), 0)
-                    ),
-                    backgroundColor: '#ff4d4f',
-                    borderRadius: 4,
-                  },
-                ],
-              }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* Stats Drawer */}
+      <Drawer title="Advance Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+        <Row gutter={16} style={{ marginBottom: '24px' }}>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Advances</span>} value={totalAdvances} valueStyle={{ fontSize: '20px', color: '#ff4d4f' }} prefix={<DollarOutlined />} suffix="Rs." /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Active Advances</span>} value={activeAdvances} valueStyle={{ fontSize: '20px', color: '#faad14' }} prefix={<ClockCircleOutlined />} /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Completed</span>} value={completedAdvances} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix={<CheckCircleOutlined />} /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Deductions</span>} value={totalDeductions} valueStyle={{ fontSize: '20px', color: '#1890ff' }} prefix={<WarningOutlined />} suffix="Rs." /></Card></Col>
+        </Row>
+        <Card title="Advance Status Distribution" bordered={false} className="shadow-sm" style={{ marginBottom: '16px' }}>
+          <PieChart data={{ labels: Array.from(new Set(filteredAdvances.map(a => String(a.status || 'pending')))), datasets: [{ label: 'Advances', data: Array.from(new Set(filteredAdvances.map(a => String(a.status || 'pending')))).map(status => filteredAdvances.filter(a => String(a.status || 'pending') === status).length), backgroundColor: ['#faad14', '#1890ff', '#52c41a', '#8c8c8c', '#ff4d4f'], borderColor: ['#fff'], borderWidth: 2 }] }} />
+        </Card>
+        <Card title="Monthly Advances Tracking" bordered={false} className="shadow-sm">
+          <BarChart data={{ labels: Array.from(new Set(filteredAdvances.map(a => dayjs(String(a.date)).format('MMM YYYY')))).reverse(), datasets: [{ label: 'Amount (Rs.)', data: Array.from(new Set(filteredAdvances.map(a => dayjs(String(a.date)).format('MMM YYYY')))).reverse().map(month => filteredAdvances.filter(a => dayjs(String(a.date)).format('MMM YYYY') === month).reduce((sum, a) => sum + Number(a.amount || 0), 0)), backgroundColor: '#ff4d4f', borderRadius: 4 }] }} />
+        </Card>
+      </Drawer>
 
       <Tabs defaultActiveKey="advances">
         <Tabs.TabPane tab="Advances" key="advances">

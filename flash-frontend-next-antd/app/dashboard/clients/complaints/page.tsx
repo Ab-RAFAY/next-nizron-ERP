@@ -17,6 +17,7 @@ import {
     Statistic,
     Descriptions,
     Divider,
+    Drawer,
 } from 'antd';
 import {
     ReloadOutlined,
@@ -30,6 +31,7 @@ import {
     EditOutlined,
 } from '@ant-design/icons';
 import { complaintsApi } from '@/lib/api';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 import dayjs from 'dayjs';
 
 const { Search } = Input;
@@ -53,6 +55,7 @@ interface Complaint extends Record<string, unknown> {
 }
 
 export default function ComplaintsPage() {
+    const { open: statsOpen, closeStats } = useStatsDrawer();
     const [complaints, setComplaints] = useState<Complaint[]>([]);
     const [loading, setLoading] = useState(false);
     const [modalVisible, setModalVisible] = useState(false);
@@ -252,47 +255,31 @@ export default function ComplaintsPage() {
                 </Button>
             </div>
 
-            <Row gutter={[16, 16]} className="mb-6">
-                <Col xs={24} sm={6}>
-                    <Card bordered={false} className="shadow-sm">
-                        <Statistic
-                            title="Total Complaints"
-                            value={kpis.total}
-                            prefix={<BulbOutlined className="text-blue-500" />}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={6}>
-                    <Card bordered={false} className="shadow-sm">
-                        <Statistic
-                            title="Open"
-                            value={kpis.open}
-                            valueStyle={{ color: '#1890ff' }}
-                            prefix={<ClockCircleOutlined />}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={6}>
-                    <Card bordered={false} className="shadow-sm">
-                        <Statistic
-                            title="In Progress"
-                            value={kpis.inProgress}
-                            valueStyle={{ color: '#faad14' }}
-                            prefix={<SyncOutlined spin={kpis.inProgress > 0} />}
-                        />
-                    </Card>
-                </Col>
-                <Col xs={24} sm={6}>
-                    <Card bordered={false} className="shadow-sm">
-                        <Statistic
-                            title="Resolved"
-                            value={kpis.resolved}
-                            valueStyle={{ color: '#52c41a' }}
-                            prefix={<CheckCircleOutlined />}
-                        />
-                    </Card>
-                </Col>
-            </Row>
+            {/* Stats Drawer */}
+            <Drawer title="Complaint Statistics" placement="right" width={520} open={statsOpen} onClose={closeStats}>
+                <Row gutter={[16, 16]}>
+                    <Col span={12}>
+                        <Card bordered={false} className="shadow-sm">
+                            <Statistic title="Total Complaints" value={kpis.total} prefix={<BulbOutlined className="text-blue-500" />} />
+                        </Card>
+                    </Col>
+                    <Col span={12}>
+                        <Card bordered={false} className="shadow-sm">
+                            <Statistic title="Open" value={kpis.open} valueStyle={{ color: '#1890ff' }} prefix={<ClockCircleOutlined />} />
+                        </Card>
+                    </Col>
+                    <Col span={12}>
+                        <Card bordered={false} className="shadow-sm">
+                            <Statistic title="In Progress" value={kpis.inProgress} valueStyle={{ color: '#faad14' }} prefix={<SyncOutlined spin={kpis.inProgress > 0} />} />
+                        </Card>
+                    </Col>
+                    <Col span={12}>
+                        <Card bordered={false} className="shadow-sm">
+                            <Statistic title="Resolved" value={kpis.resolved} valueStyle={{ color: '#52c41a' }} prefix={<CheckCircleOutlined />} />
+                        </Card>
+                    </Col>
+                </Row>
+            </Drawer>
 
             <div className="mb-4">
                 <Search

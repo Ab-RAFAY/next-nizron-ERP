@@ -6,9 +6,11 @@ import { PlusOutlined, ToolOutlined } from '@ant-design/icons';
 import { vehicleMaintenanceApi, vehicleApi } from '@/lib/api';
 import PieChart from '@/components/charts/PieChart';
 import BarChart from '@/components/charts/BarChart';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 import dayjs from 'dayjs';
 
 export default function VehicleMaintenancePage() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const [records, setRecords] = useState<Record<string, unknown>[]>([]);
   const [vehicles, setVehicles] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
@@ -231,63 +233,21 @@ export default function VehicleMaintenancePage() {
         </Space>
       </div>
 
-      <Row gutter={16} style={{ marginBottom: '24px' }}>
-        <Col span={6}>
-          <Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Records</span>} value={filteredRecords.length} valueStyle={{ fontSize: '20px' }} prefix={<ToolOutlined />} /></Card>
-        </Col>
-        <Col span={6}>
-          <Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Cost</span>} value={totalCost} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix="Rs." /></Card>
-        </Col>
-        <Col span={6}>
-          <Card><Statistic title={<span style={{ fontSize: '12px' }}>Services</span>} value={serviceCount} valueStyle={{ fontSize: '20px', color: '#1890ff' }} /></Card>
-        </Col>
-        <Col span={6}>
-          <Card><Statistic title={<span style={{ fontSize: '12px' }}>Repairs</span>} value={repairCount} valueStyle={{ fontSize: '20px', color: '#faad14' }} /></Card>
-        </Col>
-      </Row>
-
-      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-        <Col xs={24} lg={12}>
-          <Card title="Maintenance Cost by Type" bordered={false} className="shadow-sm">
-            <PieChart
-              data={{
-                labels: Array.from(new Set(filteredRecords.map(r => String(r.maintenance_type || 'unknown')))),
-                datasets: [
-                  {
-                    label: 'Total Cost (Rs.)',
-                    data: Array.from(new Set(filteredRecords.map(r => String(r.maintenance_type || 'unknown')))).map(type =>
-                      filteredRecords.filter(r => String(r.maintenance_type) === type).reduce((sum, r) => sum + Number(r.cost || 0), 0)
-                    ),
-                    backgroundColor: ['#1890ff', '#faad14', '#52c41a', '#ff4d4f'],
-                    borderColor: ['#fff'],
-                    borderWidth: 2,
-                  }
-                ]
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Vehicle Maintenance Expenses" bordered={false} className="shadow-sm">
-            <BarChart
-              horizontal
-              data={{
-                labels: Array.from(new Set(filteredRecords.map(r => String(r.vehicle_id)))),
-                datasets: [
-                  {
-                    label: 'Cost (Rs.)',
-                    data: Array.from(new Set(filteredRecords.map(r => String(r.vehicle_id)))).map(id =>
-                      filteredRecords.filter(r => String(r.vehicle_id) === id).reduce((sum, r) => sum + Number(r.cost || 0), 0)
-                    ),
-                    backgroundColor: '#722ed1',
-                    borderRadius: 4,
-                  }
-                ]
-              }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* Stats Drawer */}
+      <Drawer title="Maintenance Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+        <Row gutter={16} style={{ marginBottom: '24px' }}>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Records</span>} value={filteredRecords.length} valueStyle={{ fontSize: '20px' }} prefix={<ToolOutlined />} /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Cost</span>} value={totalCost} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix="Rs." /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Services</span>} value={serviceCount} valueStyle={{ fontSize: '20px', color: '#1890ff' }} /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Repairs</span>} value={repairCount} valueStyle={{ fontSize: '20px', color: '#faad14' }} /></Card></Col>
+        </Row>
+        <Card title="Maintenance Cost by Type" bordered={false} className="shadow-sm" style={{ marginBottom: '16px' }}>
+          <PieChart data={{ labels: Array.from(new Set(filteredRecords.map(r => String(r.maintenance_type || 'unknown')))), datasets: [{ label: 'Total Cost (Rs.)', data: Array.from(new Set(filteredRecords.map(r => String(r.maintenance_type || 'unknown')))).map(type => filteredRecords.filter(r => String(r.maintenance_type) === type).reduce((sum, r) => sum + Number(r.cost || 0), 0)), backgroundColor: ['#1890ff', '#faad14', '#52c41a', '#ff4d4f'], borderColor: ['#fff'], borderWidth: 2 }] }} />
+        </Card>
+        <Card title="Vehicle Maintenance Expenses" bordered={false} className="shadow-sm">
+          <BarChart horizontal data={{ labels: Array.from(new Set(filteredRecords.map(r => String(r.vehicle_id)))), datasets: [{ label: 'Cost (Rs.)', data: Array.from(new Set(filteredRecords.map(r => String(r.vehicle_id)))).map(id => filteredRecords.filter(r => String(r.vehicle_id) === id).reduce((sum, r) => sum + Number(r.cost || 0), 0)), backgroundColor: '#722ed1', borderRadius: 4 }] }} />
+        </Card>
+      </Drawer>
 
       <Table columns={columns} dataSource={filteredRecords} rowKey="id" loading={loading} size="small" pagination={{ pageSize: 20 }} style={{ fontSize: '11px' }} />
 

@@ -6,9 +6,11 @@ import { PlusOutlined, DollarOutlined, RiseOutlined, FallOutlined, CheckCircleOu
 import { expensesApi, financeApi } from '@/lib/api';
 import PieChart from '@/components/charts/PieChart';
 import BarChart from '@/components/charts/BarChart';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 import dayjs from 'dayjs';
 
 export default function FinancePage() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const [expenses, setExpenses] = useState<Record<string, unknown>[]>([]);
   const [income, setIncome] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
@@ -260,92 +262,21 @@ export default function FinancePage() {
         </Space>
       </div>
 
-      <Row gutter={16} style={{ marginBottom: '24px' }}>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Total Income</span>}
-              value={totalIncome}
-              valueStyle={{ fontSize: '20px', color: '#52c41a' }}
-              prefix={<RiseOutlined />}
-              suffix="Rs."
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Total Expenses</span>}
-              value={totalExpenses}
-              valueStyle={{ fontSize: '20px', color: '#ff4d4f' }}
-              prefix={<FallOutlined />}
-              suffix="Rs."
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Net Balance</span>}
-              value={netBalance}
-              valueStyle={{ fontSize: '20px', color: netBalance >= 0 ? '#52c41a' : '#ff4d4f', fontWeight: 600 }}
-              prefix={<DollarOutlined />}
-              suffix="Rs."
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title={<span style={{ fontSize: '12px' }}>Paid Expenses</span>}
-              value={paidExpenses}
-              valueStyle={{ fontSize: '20px', color: '#1890ff' }}
-              prefix={<CheckCircleOutlined />}
-              suffix="Rs."
-            />
-          </Card>
-        </Col>
-      </Row>
-
-      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-        <Col xs={24} lg={12}>
-          <Card title="Expense by Category" bordered={false} className="shadow-sm">
-            <PieChart
-              data={{
-                labels: Array.from(new Set(filteredExpenses.map(e => String(e.category || 'Other')))),
-                datasets: [
-                  {
-                    label: 'Amount (Rs.)',
-                    data: Array.from(new Set(filteredExpenses.map(e => String(e.category || 'Other')))).map(cat =>
-                      filteredExpenses.filter(e => String(e.category || 'Other') === cat).reduce((sum, e) => sum + Number(e.amount || 0), 0)
-                    ),
-                    backgroundColor: ['#ff4d4f', '#faad14', '#1890ff', '#52c41a', '#722ed1', '#13c2c2'],
-                    borderColor: ['#fff'],
-                    borderWidth: 2,
-                  },
-                ],
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Cash Flow Overview" bordered={false} className="shadow-sm">
-            <BarChart
-              data={{
-                labels: ['Income', 'Expenses'],
-                datasets: [
-                  {
-                    label: 'Amount (Rs.)',
-                    data: [totalIncome, totalExpenses],
-                    backgroundColor: ['#52c41a', '#ff4d4f'],
-                    borderRadius: 4,
-                  },
-                ],
-              }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* Stats Drawer */}
+      <Drawer title="Finance Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+        <Row gutter={16} style={{ marginBottom: '24px' }}>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Income</span>} value={totalIncome} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix={<RiseOutlined />} suffix="Rs." /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Expenses</span>} value={totalExpenses} valueStyle={{ fontSize: '20px', color: '#ff4d4f' }} prefix={<FallOutlined />} suffix="Rs." /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Net Balance</span>} value={netBalance} valueStyle={{ fontSize: '20px', color: netBalance >= 0 ? '#52c41a' : '#ff4d4f', fontWeight: 600 }} prefix={<DollarOutlined />} suffix="Rs." /></Card></Col>
+          <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Paid Expenses</span>} value={paidExpenses} valueStyle={{ fontSize: '20px', color: '#1890ff' }} prefix={<CheckCircleOutlined />} suffix="Rs." /></Card></Col>
+        </Row>
+        <Card title="Expense by Category" bordered={false} className="shadow-sm" style={{ marginBottom: '16px' }}>
+          <PieChart data={{ labels: Array.from(new Set(filteredExpenses.map(e => String(e.category || 'Other')))), datasets: [{ label: 'Amount (Rs.)', data: Array.from(new Set(filteredExpenses.map(e => String(e.category || 'Other')))).map(cat => filteredExpenses.filter(e => String(e.category || 'Other') === cat).reduce((sum, e) => sum + Number(e.amount || 0), 0)), backgroundColor: ['#ff4d4f', '#faad14', '#1890ff', '#52c41a', '#722ed1', '#13c2c2'], borderColor: ['#fff'], borderWidth: 2 }] }} />
+        </Card>
+        <Card title="Cash Flow Overview" bordered={false} className="shadow-sm">
+          <BarChart data={{ labels: ['Income', 'Expenses'], datasets: [{ label: 'Amount (Rs.)', data: [totalIncome, totalExpenses], backgroundColor: ['#52c41a', '#ff4d4f'], borderRadius: 4 }] }} />
+        </Card>
+      </Drawer>
 
       <Tabs defaultActiveKey="expenses">
         <Tabs.TabPane

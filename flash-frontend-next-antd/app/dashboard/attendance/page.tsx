@@ -44,6 +44,7 @@ import dayjs, { Dayjs } from 'dayjs';
 import { useEffect, useState } from 'react';
 import PieChart from '@/components/charts/PieChart';
 import BarChart from '@/components/charts/BarChart';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 
 const { TextArea } = Input;
 
@@ -143,6 +144,7 @@ interface AttendanceRecord {
 }
 
 export default function AttendancePage() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const [selectedDate, setSelectedDate] = useState<Dayjs>(dayjs());
   const [attendance, setAttendance] = useState<AttendanceRecord[]>([]);
   const [employees, setEmployees] = useState<Array<Record<string, unknown>>>([]);
@@ -979,120 +981,44 @@ export default function AttendancePage() {
         </div>
       </div>
 
-      <Row gutter={[24, 24]} className="mb-8">
-        <Col xs={12} sm={6} lg={3}>
-          <Card className="summary-stat-card bg-white border-none shadow-sm rounded-2xl">
-            <Statistic
-              title="Present"
-              value={summary.present}
-              valueStyle={{ color: '#52c41a' }}
-              prefix={<CheckCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6} lg={3}>
-          <Card className="summary-stat-card bg-white border-none shadow-sm rounded-2xl">
-            <Statistic
-              title="Late"
-              value={summary.late}
-              valueStyle={{ color: '#faad14' }}
-              prefix={<ClockCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6} lg={3}>
-          <Card className="summary-stat-card bg-white border-none shadow-sm rounded-2xl">
-            <Statistic
-              title="Absent"
-              value={summary.absent}
-              valueStyle={{ color: '#ff4d4f' }}
-              prefix={<CloseCircleOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6} lg={3}>
-          <Card className="summary-stat-card bg-white border-none shadow-sm rounded-2xl">
-            <Statistic
-              title="Leave"
-              value={summary.leave}
-              valueStyle={{ color: '#1890ff' }}
-              prefix={<CalendarOutlined />}
-            />
-          </Card>
-        </Col>
-        <Col xs={12} sm={6} lg={3}>
-          <Card className="summary-stat-card bg-linear-to-r from-green-500 to-emerald-600 border-none shadow-lg rounded-2xl">
-            <div className="text-white">
-              <div className="text-green-100 mb-1 text-sm">Total Working Hours</div>
-              <div className="text-2xl font-bold flex items-center gap-2">
-                <ClockCircleOutlined />
-                {summary.totalWorkingHours}
-              </div>
-            </div>
-          </Card>
-        </Col>
-        <Col xs={12} sm={6} lg={3}>
-          <Card className="summary-stat-card bg-linear-to-r from-orange-500 to-amber-600 border-none shadow-lg rounded-2xl">
-            <div className="text-white">
-              <div className="text-orange-100 mb-1 text-sm">Total Overtime Hours</div>
-              <div className="text-2xl font-bold flex items-center gap-2">
-                <HistoryOutlined />
-                {summary.totalOvertimeHours}
-              </div>
-            </div>
-          </Card>
-        </Col>
-        <Col xs={24} sm={12} lg={6}>
-          <Card className="summary-stat-card bg-blue-600 border-none shadow-lg rounded-2xl text-white">
-            <div className="flex justify-between items-center text-white">
-              <div>
-                <div className="text-blue-100 mb-1">Marking Progress</div>
-                <div className="text-2xl font-bold">
-                  {summary.total - summary.unmarked} / {summary.total}
-                </div>
-              </div>
-              <div style={{ opacity: 0.2 }}><FileTextOutlined style={{ fontSize: 40 }} /></div>
-            </div>
-          </Card>
-        </Col>
-      </Row>
-
-      {/* Attendance Charts */}
-      <Row gutter={[24, 24]} className="mb-8">
-        <Col xs={24} md={12}>
-          <Card className="bg-white border-none shadow-sm rounded-2xl" title="Attendance Status Distribution">
-            <PieChart
-              data={{
-                labels: ['Present', 'Late', 'Absent', 'Leave', 'Unmarked'],
-                datasets: [{
-                  label: 'Attendance',
-                  data: [summary.present, summary.late, summary.absent, summary.leave, summary.unmarked],
-                  backgroundColor: ['#52c41a', '#faad14', '#ff4d4f', '#1890ff', '#d9d9d9'],
-                  borderColor: ['#52c41a', '#faad14', '#ff4d4f', '#1890ff', '#d9d9d9'],
-                  borderWidth: 1,
-                }],
-              }}
-              title="Today's Attendance"
-            />
-          </Card>
-        </Col>
-        <Col xs={24} md={12}>
-          <Card className="bg-white border-none shadow-sm rounded-2xl" title="Attendance Overview">
-            <BarChart
-              data={{
-                labels: ['Present', 'Late', 'Absent', 'Leave', 'Unmarked'],
-                datasets: [{
-                  label: 'Count',
-                  data: [summary.present, summary.late, summary.absent, summary.leave, summary.unmarked],
-                  backgroundColor: ['#52c41a', '#faad14', '#ff4d4f', '#1890ff', '#d9d9d9'],
-                  borderRadius: 8,
-                }],
-              }}
-              title="Status Breakdown"
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* Stats Drawer */}
+      <Drawer title="Attendance Statistics" placement="right" width={720} open={statsOpen} onClose={closeStats}>
+        <Row gutter={[24, 24]} className="mb-8">
+          <Col xs={12} sm={12}>
+            <Card className="summary-stat-card bg-white border-none shadow-sm rounded-2xl"><Statistic title="Present" value={summary.present} valueStyle={{ color: '#52c41a' }} prefix={<CheckCircleOutlined />} /></Card>
+          </Col>
+          <Col xs={12} sm={12}>
+            <Card className="summary-stat-card bg-white border-none shadow-sm rounded-2xl"><Statistic title="Late" value={summary.late} valueStyle={{ color: '#faad14' }} prefix={<ClockCircleOutlined />} /></Card>
+          </Col>
+          <Col xs={12} sm={12}>
+            <Card className="summary-stat-card bg-white border-none shadow-sm rounded-2xl"><Statistic title="Absent" value={summary.absent} valueStyle={{ color: '#ff4d4f' }} prefix={<CloseCircleOutlined />} /></Card>
+          </Col>
+          <Col xs={12} sm={12}>
+            <Card className="summary-stat-card bg-white border-none shadow-sm rounded-2xl"><Statistic title="Leave" value={summary.leave} valueStyle={{ color: '#1890ff' }} prefix={<CalendarOutlined />} /></Card>
+          </Col>
+          <Col xs={12} sm={12}>
+            <Card className="summary-stat-card bg-linear-to-r from-green-500 to-emerald-600 border-none shadow-lg rounded-2xl">
+              <div className="text-white"><div className="text-green-100 mb-1 text-sm">Total Working Hours</div><div className="text-2xl font-bold flex items-center gap-2"><ClockCircleOutlined />{summary.totalWorkingHours}</div></div>
+            </Card>
+          </Col>
+          <Col xs={12} sm={12}>
+            <Card className="summary-stat-card bg-linear-to-r from-orange-500 to-amber-600 border-none shadow-lg rounded-2xl">
+              <div className="text-white"><div className="text-orange-100 mb-1 text-sm">Total Overtime Hours</div><div className="text-2xl font-bold flex items-center gap-2"><HistoryOutlined />{summary.totalOvertimeHours}</div></div>
+            </Card>
+          </Col>
+          <Col xs={24}>
+            <Card className="summary-stat-card bg-blue-600 border-none shadow-lg rounded-2xl text-white">
+              <div className="flex justify-between items-center text-white"><div><div className="text-blue-100 mb-1">Marking Progress</div><div className="text-2xl font-bold">{summary.total - summary.unmarked} / {summary.total}</div></div><div style={{ opacity: 0.2 }}><FileTextOutlined style={{ fontSize: 40 }} /></div></div>
+            </Card>
+          </Col>
+        </Row>
+        <Card className="bg-white border-none shadow-sm rounded-2xl mb-4" title="Attendance Status Distribution">
+          <PieChart data={{ labels: ['Present', 'Late', 'Absent', 'Leave', 'Unmarked'], datasets: [{ label: 'Attendance', data: [summary.present, summary.late, summary.absent, summary.leave, summary.unmarked], backgroundColor: ['#52c41a', '#faad14', '#ff4d4f', '#1890ff', '#d9d9d9'], borderColor: ['#52c41a', '#faad14', '#ff4d4f', '#1890ff', '#d9d9d9'], borderWidth: 1 }] }} title="Today's Attendance" />
+        </Card>
+        <Card className="bg-white border-none shadow-sm rounded-2xl" title="Attendance Overview">
+          <BarChart data={{ labels: ['Present', 'Late', 'Absent', 'Leave', 'Unmarked'], datasets: [{ label: 'Count', data: [summary.present, summary.late, summary.absent, summary.leave, summary.unmarked], backgroundColor: ['#52c41a', '#faad14', '#ff4d4f', '#1890ff', '#d9d9d9'], borderRadius: 8 }] }} title="Status Breakdown" />
+        </Card>
+      </Drawer>
 
       <div className="flex justify-between items-center mb-6 gap-4">
         <div className="flex items-center gap-4 flex-1">

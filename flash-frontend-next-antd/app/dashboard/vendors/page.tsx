@@ -27,6 +27,7 @@ import { vendorApi } from '@/lib/api';
 import VendorForm from './VendorForm';
 import PieChart from '@/components/charts/PieChart';
 import BarChart from '@/components/charts/BarChart';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 
 const { Search } = Input;
 
@@ -42,6 +43,7 @@ interface Vendor extends Record<string, unknown> {
 }
 
 export default function VendorsPage() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const router = useRouter();
   const { message } = App.useApp();
   const [vendors, setVendors] = useState<Vendor[]>([]);
@@ -220,69 +222,19 @@ export default function VendorsPage() {
         </h1>
         
         {/* Statistics Cards */}
-        <Row gutter={16} className="mb-6">
-          <Col xs={24} sm={12} md={8}>
-            <Card>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-blue-600">{totalVendors}</div>
-                <div className="text-gray-600">Total Vendors</div>
-              </div>
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={8}>
-            <Card>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-green-600">{activeVendors}</div>
-                <div className="text-gray-600">Active Vendors</div>
-              </div>
-            </Card>
-          </Col>
-          <Col xs={24} sm={12} md={8}>
-            <Card>
-              <div className="text-center">
-                <div className="text-2xl font-bold text-red-600">{inactiveVendors}</div>
-                <div className="text-gray-600">Inactive Vendors</div>
-              </div>
-            </Card>
-          </Col>
-        </Row>
-
-        {/* Vendor Charts */}
-        <Row gutter={16} className="mb-6">
-          <Col xs={24} md={12}>
-            <Card title="Vendor Status">
-              <PieChart
-                data={{
-                  labels: ['Active', 'Inactive'],
-                  datasets: [{
-                    label: 'Vendor Status',
-                    data: [activeVendors, inactiveVendors],
-                    backgroundColor: ['#52c41a', '#ff4d4f'],
-                    borderColor: ['#52c41a', '#ff4d4f'],
-                    borderWidth: 1,
-                  }],
-                }}
-                title="Status Distribution"
-              />
-            </Card>
-          </Col>
-          <Col xs={24} md={12}>
-            <Card title="Vendors by Category">
-              <BarChart
-                data={{
-                  labels: categoryLabels,
-                  datasets: [{
-                    label: 'Vendors',
-                    data: categoryCounts,
-                    backgroundColor: categoryColors.slice(0, categoryLabels.length),
-                    borderRadius: 8,
-                  }],
-                }}
-                title="Category Breakdown"
-              />
-            </Card>
-          </Col>
-        </Row>
+        <Drawer title="Vendor Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+          <Row gutter={16} className="mb-6">
+            <Col xs={24} sm={8}><Card><div className="text-center"><div className="text-2xl font-bold text-blue-600">{totalVendors}</div><div className="text-gray-600">Total Vendors</div></div></Card></Col>
+            <Col xs={24} sm={8}><Card><div className="text-center"><div className="text-2xl font-bold text-green-600">{activeVendors}</div><div className="text-gray-600">Active Vendors</div></div></Card></Col>
+            <Col xs={24} sm={8}><Card><div className="text-center"><div className="text-2xl font-bold text-red-600">{inactiveVendors}</div><div className="text-gray-600">Inactive Vendors</div></div></Card></Col>
+          </Row>
+          <Card title="Vendor Status" style={{ marginBottom: '16px' }}>
+            <PieChart data={{ labels: ['Active', 'Inactive'], datasets: [{ label: 'Vendor Status', data: [activeVendors, inactiveVendors], backgroundColor: ['#52c41a', '#ff4d4f'], borderColor: ['#52c41a', '#ff4d4f'], borderWidth: 1 }] }} title="Status Distribution" />
+          </Card>
+          <Card title="Vendors by Category">
+            <BarChart data={{ labels: categoryLabels, datasets: [{ label: 'Vendors', data: categoryCounts, backgroundColor: categoryColors.slice(0, categoryLabels.length), borderRadius: 8 }] }} title="Category Breakdown" />
+          </Card>
+        </Drawer>
 
         <div className="flex justify-between items-center">
           <Space>

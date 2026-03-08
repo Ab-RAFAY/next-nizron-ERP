@@ -5,9 +5,11 @@ import { Table, Button, Space, Drawer, Form, Input, DatePicker, Select, InputNum
 import { PlusOutlined, DashboardOutlined } from '@ant-design/icons';
 import { fuelEntryApi, vehicleApi } from '@/lib/api';
 import BarChart from '@/components/charts/BarChart';
+import { useStatsDrawer } from '@/lib/stats-drawer-context';
 import dayjs from 'dayjs';
 
 export default function FuelEntriesPage() {
+  const { open: statsOpen, closeStats } = useStatsDrawer();
   const [entries, setEntries] = useState<Record<string, unknown>[]>([]);
   const [vehicles, setVehicles] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(false);
@@ -211,59 +213,20 @@ export default function FuelEntriesPage() {
         </Space>
       </div>
 
-      <Row gutter={16} style={{ marginBottom: '24px' }}>
-        <Col span={8}>
-          <Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Entries</span>} value={filteredEntries.length} valueStyle={{ fontSize: '20px' }} prefix={<DashboardOutlined />} /></Card>
-        </Col>
-        <Col span={8}>
-          <Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Liters</span>} value={totalLiters.toFixed(2)} valueStyle={{ fontSize: '20px', color: '#1890ff' }} /></Card>
-        </Col>
-        <Col span={8}>
-          <Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Cost</span>} value={totalCost} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix="Rs." /></Card>
-        </Col>
-      </Row>
-
-      <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
-        <Col xs={24} lg={12}>
-          <Card title="Fuel Cost by Vehicle" bordered={false} className="shadow-sm">
-            <BarChart
-              horizontal
-              data={{
-                labels: Array.from(new Set(filteredEntries.map(e => String(e.vehicle_id)))),
-                datasets: [
-                  {
-                    label: 'Total Cost (Rs.)',
-                    data: Array.from(new Set(filteredEntries.map(e => String(e.vehicle_id)))).map(id =>
-                      filteredEntries.filter(e => String(e.vehicle_id) === id).reduce((sum, e) => sum + Number(e.total_cost || 0), 0)
-                    ),
-                    backgroundColor: '#3b82f6',
-                    borderRadius: 4,
-                  }
-                ]
-              }}
-            />
-          </Card>
-        </Col>
-        <Col xs={24} lg={12}>
-          <Card title="Monthly Fuel Consumption" bordered={false} className="shadow-sm">
-            <BarChart
-              data={{
-                labels: Array.from(new Set(filteredEntries.map(e => dayjs(String(e.entry_date)).format('MMM YYYY')))).reverse(),
-                datasets: [
-                  {
-                    label: 'Liters',
-                    data: Array.from(new Set(filteredEntries.map(e => dayjs(String(e.entry_date)).format('MMM YYYY')))).reverse().map(month =>
-                      filteredEntries.filter(e => dayjs(String(e.entry_date)).format('MMM YYYY') === month).reduce((sum, e) => sum + Number(e.liters || 0), 0)
-                    ),
-                    backgroundColor: '#10b981',
-                    borderRadius: 4,
-                  }
-                ]
-              }}
-            />
-          </Card>
-        </Col>
-      </Row>
+      {/* Stats Drawer */}
+      <Drawer title="Fuel Entry Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+        <Row gutter={16} style={{ marginBottom: '24px' }}>
+          <Col span={8}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Entries</span>} value={filteredEntries.length} valueStyle={{ fontSize: '20px' }} prefix={<DashboardOutlined />} /></Card></Col>
+          <Col span={8}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Liters</span>} value={totalLiters.toFixed(2)} valueStyle={{ fontSize: '20px', color: '#1890ff' }} /></Card></Col>
+          <Col span={8}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Cost</span>} value={totalCost} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix="Rs." /></Card></Col>
+        </Row>
+        <Card title="Fuel Cost by Vehicle" bordered={false} className="shadow-sm" style={{ marginBottom: '16px' }}>
+          <BarChart horizontal data={{ labels: Array.from(new Set(filteredEntries.map(e => String(e.vehicle_id)))), datasets: [{ label: 'Total Cost (Rs.)', data: Array.from(new Set(filteredEntries.map(e => String(e.vehicle_id)))).map(id => filteredEntries.filter(e => String(e.vehicle_id) === id).reduce((sum, e) => sum + Number(e.total_cost || 0), 0)), backgroundColor: '#3b82f6', borderRadius: 4 }] }} />
+        </Card>
+        <Card title="Monthly Fuel Consumption" bordered={false} className="shadow-sm">
+          <BarChart data={{ labels: Array.from(new Set(filteredEntries.map(e => dayjs(String(e.entry_date)).format('MMM YYYY')))).reverse(), datasets: [{ label: 'Liters', data: Array.from(new Set(filteredEntries.map(e => dayjs(String(e.entry_date)).format('MMM YYYY')))).reverse().map(month => filteredEntries.filter(e => dayjs(String(e.entry_date)).format('MMM YYYY') === month).reduce((sum, e) => sum + Number(e.liters || 0), 0)), backgroundColor: '#10b981', borderRadius: 4 }] }} />
+        </Card>
+      </Drawer>
 
       <Table columns={columns} dataSource={filteredEntries} rowKey="id" loading={loading} size="small" pagination={{ pageSize: 20 }} style={{ fontSize: '11px' }} />
 
