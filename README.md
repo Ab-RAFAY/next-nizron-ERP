@@ -1,50 +1,90 @@
-# Nizron ERP - Dockploy Deployment Guide
+# Nizron ERP - Enterprise Resource Planning System
 
-This repository contains two apps:
-- Backend (NestJS): `flash-backend-nestjs`
-- Frontend (Next.js): `flash-frontend-next-antd`
+![Nizron Logo](flash-frontend-next-antd/public/images/images.png)
 
-Both are configured for Nixpacks builds and Dockploy deployment.
+A comprehensive, professional-grade ERP system built for performance, scalability, and modern aesthetics. This monorepo contains the full-stack ecosystem including a Next.js dashboard, a NestJS backend, and an Expo mobile application.
 
-## Backend (NestJS)
-- Build: `npm run build`
-- Start: `npm run start:prod` (uses `process.env.PORT` or defaults to 8000)
+## 🚀 Overview
 
-### Required environment variables
-- `DATABASE_URL`: Postgres connection string (e.g. `postgres://user:pass@host:5432/db?sslmode=require`)
-- `JWT_SECRET`: secret for auth tokens
-- `CORS_ORIGINS`: comma-separated allowed origins (e.g. `https://your-frontend.example`)
+Nizron ERP is designed to streamline enterprise operations with a high-density, professional UI and a robust scalable backend. It provides end-to-end management for HR, Fleet, Finance, and Inventory.
 
-### Optional (Cloud storage via Backblaze B2 S3)
-- `B2_KEY_ID`
-- `B2_APPLICATION_KEY`
-- `B2_BUCKET_NAME`
-- `B2_ENDPOINT` (e.g. `https://s3.us-west-002.backblazeb2.com`)
+### 🍱 Project Structure
 
-Notes:
-- Local `uploads/` directories are auto-initialized; prefer cloud storage in production.
-- The app listens on `PORT` provided by Dockploy/Nixpacks.
+```text
+.
+├── flah-app                  # Mobile Application (Expo / React Native)
+├── flash-backend-nestjs      # Core API (NestJS + Drizzle ORM + Supabase/PostgreSQL)
+└── flash-frontend-next-antd  # Web Dashboard (Next.js 14 App Router + Ant Design)
+```
 
-## Frontend (Next.js)
-- Build: `npm run build`
-- Start: `npm run start` (binds to `$PORT`)
+## ✨ Key Features
 
-### Required environment variables
-- `NEXT_PUBLIC_API_URL`: Base URL for the backend (e.g. `https://your-backend.example`)
+### 🏢 Core Modules
+- **Human Resources**: Complete workforce management, attendance tracking, leave requests, and payroll processing.
+- **Fleet Management**: Vehicle life-cycle management, fuel tracking, maintenance logs, and vehicle assignments.
+- **Operations & Procurement**: Comprehensive client/vendor management, purchase orders, and complaint tracking.
+- **Inventory Control**: Real-time management for both general and restricted inventory items.
+- **Finance & Accounting**: Expense tracking, cash advances, and financial reporting.
 
-## Dockploy Setup
-1. Create two services from this repo:
-   - Service A: `flash-backend-nestjs`
-   - Service B: `flash-frontend-next-antd`
-2. Dockploy should detect Nixpacks for each service.
-3. Set the relevant environment variables for each service (above).
-4. Deploy. Ensure the frontend `NEXT_PUBLIC_API_URL` points to the backend URL.
+### 🎨 UI/UX Excellence
+- **High-Density Design**: Optimized for information density and efficiency, refined for professional enterprise use.
+- **Modern Tech Stack**: Built with Ant Design 5.0, featuring a sticky header, slim sidebar, and responsive layouts.
+- **Global Search & Filter**: Powerful, instant search and advanced filtering across all modules.
+- **Fixed-Header Tables**: Smooth data browsing with fixed headers and internal scrolling (Enterprise-grade performance).
 
-## Repo Hygiene
-- Root `.gitignore` excludes build outputs, env files, logs, local uploads, and `sqlite.db`.
-- Docker files were removed; deployment is via Nixpacks/Dockploy.
+### 📱 Mobile Excellence
+- **Cross-Platform**: Built with Expo for seamless use on both iOS and Android.
+- **Real-time Sync**: Direct integration with the NestJS backend for real-time status updates.
 
-## Troubleshooting
-- Backend not reachable: verify `DATABASE_URL`, `PORT`, and `CORS_ORIGINS`.
-- Frontend API errors: ensure `NEXT_PUBLIC_API_URL` matches the backend public URL.
-- Storage errors: set B2 variables or disable cloud features if not used.
+## 🛠 Tech Stack
+
+| Module | Technologies |
+|--------|--------------|
+| **Frontend** | Next.js 14, Ant Design, TypeScript, Tailwind CSS |
+| **Backend** | NestJS, Drizzle ORM, Supabase (PostgreSQL), JWT |
+| **Mobile** | Expo, React Native, React Navigation |
+| **DevOps** | Nixpacks, GitHub Actions, Vercel/Dockploy |
+
+## ⚙️ Quick Start
+
+### Prerequisites
+- Node.js (v18+)
+- PostgreSQL or Supabase account
+- Git
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/Ab-RAFAY/next-nizron-ERP.git
+   cd next-nizron-ERP
+   ```
+
+2. **Frontend Setup**
+   ```bash
+   cd flash-frontend-next-antd
+   npm install
+   npm run dev
+   ```
+
+3. **Backend Setup**
+   ```bash
+   cd ../flash-backend-nestjs
+   npm install
+   # Configure your .env (see Guide)
+   npm run start:dev
+   ```
+
+4. **Mobile Setup**
+   ```bash
+   cd ../flah-app
+   npm install
+   npx expo start
+   ```
+
+## 📄 License
+
+This project is proprietary and for internal use only.
+
+---
+© 2026 Nizron ERP. All rights reserved.
