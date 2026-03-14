@@ -214,7 +214,7 @@ export default function FuelEntriesPage() {
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Fuel Entry Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Fuel Entry Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Row gutter={16} style={{ marginBottom: '24px' }}>
           <Col span={8}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Entries</span>} value={filteredEntries.length} valueStyle={{ fontSize: '20px' }} prefix={<DashboardOutlined />} /></Card></Col>
           <Col span={8}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Liters</span>} value={totalLiters.toFixed(2)} valueStyle={{ fontSize: '20px', color: '#1890ff' }} /></Card></Col>
@@ -233,7 +233,7 @@ export default function FuelEntriesPage() {
       <Drawer
         title={editingEntry ? 'Edit Entry' : 'Add Entry'}
         placement="right"
-        width={720}
+        size={720}
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         footer={<div style={{ textAlign: 'right' }}><Space><Button onClick={() => setDrawerVisible(false)}>Cancel</Button><Button type="primary" onClick={handleSubmit}>{editingEntry ? 'Update' : 'Create'}</Button></Space></div>}

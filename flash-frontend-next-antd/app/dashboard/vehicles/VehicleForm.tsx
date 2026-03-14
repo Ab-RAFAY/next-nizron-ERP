@@ -1,6 +1,6 @@
 'use client';
 
-import { Form, Input, Button, Row, Col, InputNumber, Select, Divider, AutoComplete, DatePicker } from 'antd';
+import { Form, Input, Button, Row, Col, InputNumber, Select, Divider, AutoComplete, DatePicker, Space } from 'antd';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 import { vehicleApi } from '@/lib/api';
@@ -226,12 +226,18 @@ export default function VehicleForm({ initialValues, onSubmit, onCancel, allVehi
             name="fuel_limit_monthly"
             extra="Set a monthly fuel consumption limit. You'll be notified when this vehicle exceeds the limit."
           >
-            <InputNumber
-              style={{ width: '100%' }}
-              min={0}
-              placeholder="e.g., 200"
-              addonAfter="Liters"
-            />
+            <Space.Compact style={{ width: '100%' }}>
+              <InputNumber
+                style={{ width: '100%' }}
+                min={0}
+                placeholder="e.g., 200"
+              />
+              <Input
+                style={{ width: '80px' }}
+                disabled
+                value="Liters"
+              />
+            </Space.Compact>
           </Form.Item>
         </Col>
       </Row>

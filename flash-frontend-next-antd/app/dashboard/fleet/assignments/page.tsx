@@ -350,25 +350,26 @@ export default function VehicleAssignmentsPage() {
   const vTypeColors = ['#1890ff', '#52c41a', '#faad14', '#ff4d4f', '#722ed1', '#13c2c2', '#eb2f96'];
 
   return (
-    <div style={{ padding: '24px' }}>
-      <div style={{ marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 600 }}>Vehicle Assignments</h2>
-        <Space>
+    <div>
+      <div style={{ marginBottom: 12, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2 style={{ margin: 0, fontSize: 18, fontWeight: 600, color: '#1f1f1f' }}>Vehicle Assignments</h2>
+        <Space size={6}>
           <Input.Search
             placeholder="Search assignments..."
             value={searchText}
+            size="small"
             onChange={(e) => setSearchText(e.target.value)}
             allowClear
-            style={{ width: 250 }}
+            style={{ width: 220 }}
           />
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleAdd}>
+          <Button type="primary" size="small" icon={<PlusOutlined />} onClick={handleAdd}>
             Add Assignment
           </Button>
         </Space>
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Assignment Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Assignment Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Row gutter={16} style={{ marginBottom: '24px' }}>
           <Col span={8}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Assignments</span>} value={totalAssignments} valueStyle={{ fontSize: '20px' }} prefix={<CarOutlined />} /></Card></Col>
           <Col span={8}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Active</span>} value={activeCount} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix={<CheckCircleOutlined />} /></Card></Col>
@@ -385,17 +386,17 @@ export default function VehicleAssignmentsPage() {
       <Table
         columns={columns}
         dataSource={currentFilteredAssignments}
-        rowKey="id"
+        rowKey={(record, index) => record.id ? `${record.id}-${index}` : `assignment-${index}`}
         loading={loading}
         size="small"
-        pagination={{ pageSize: 20 }}
-        style={{ fontSize: '11px' }}
+        pagination={{ pageSize: 20, size: 'small' }}
+        scroll={{ x: 1000, y: 'calc(100vh - 220px)' }}
       />
 
       <Drawer
         title={editingAssignment ? 'Edit Assignment' : 'Add Assignment'}
         placement="right"
-        width={720}
+        size={720}
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         footer={

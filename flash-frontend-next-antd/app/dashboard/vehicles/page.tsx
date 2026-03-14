@@ -311,14 +311,14 @@ export default function VehiclesPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <h1 style={{ fontSize: 18, fontWeight: 600, margin: 0, color: '#1f1f1f', display: 'flex', alignItems: 'center', gap: 6 }}>
             <CarOutlined /> Vehicles
           </h1>
-          <p className="text-gray-500 mt-1">Manage your fleet</p>
+          <p style={{ fontSize: 12, color: '#8c8c8c', margin: '2px 0 0' }}>Manage your fleet</p>
         </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate} size="large">
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate} size="small">
           Add Vehicle
         </Button>
       </div>
@@ -368,15 +368,15 @@ export default function VehiclesPage() {
         </Col>
       </Row>
 
-      <div className="mb-4 flex gap-4">
-        <Button icon={<ReloadOutlined />} onClick={() => fetchVehicles()}>
+      <div className="mb-3 flex gap-2">
+        <Button size="small" icon={<ReloadOutlined />} onClick={() => fetchVehicles()}>
           Refresh
         </Button>
-        <Button onClick={handleManageCategories}>
-          Manage Categories
+        <Button size="small" onClick={handleManageCategories}>
+          Categories
         </Button>
-        <Button onClick={() => setTypeModalVisible(true)}>
-          Manage Vehicle Types
+        <Button size="small" onClick={() => setTypeModalVisible(true)}>
+          Vehicle Types
         </Button>
       </div>
 
@@ -386,7 +386,7 @@ export default function VehiclesPage() {
         rowKey="vehicle_id"
         loading={loading}
         size="small"
-        scroll={{ x: 1200 }}
+        scroll={{ x: 1200, y: 'calc(100vh - 280px)' }}
         className="compact-table"
       />
 
@@ -394,7 +394,7 @@ export default function VehiclesPage() {
         title={editingVehicle ? 'Edit Vehicle' : 'Add Vehicle'}
         open={drawerVisible}
         onClose={() => setDrawerVisible(false)}
-        width={720}
+        size={720}
         destroyOnClose
       >
         <VehicleForm

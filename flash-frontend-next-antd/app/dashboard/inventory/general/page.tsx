@@ -365,7 +365,7 @@ export default function GeneralInventoryPage() {
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="General Inventory Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="General Inventory Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Row gutter={16} style={{ marginBottom: '24px' }}>
           <Col span={24}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Quantity</span>} value={totalStock} valueStyle={{ fontSize: '20px', color: '#1890ff' }} prefix={<InboxOutlined />} /></Card></Col>
         </Row>
@@ -390,7 +390,7 @@ export default function GeneralInventoryPage() {
       <Drawer
         title={editingItem ? 'Edit Item' : 'Add Item'}
         placement="right"
-        width={720}
+        size={720}
         onClose={() => setItemDrawerVisible(false)}
         open={itemDrawerVisible}
         footer={<div style={{ textAlign: 'right' }}><Space><Button onClick={() => setItemDrawerVisible(false)}>Cancel</Button><Button type="primary" onClick={handleSubmitItem}>{editingItem ? 'Update' : 'Create'}</Button></Space></div>}
@@ -413,7 +413,7 @@ export default function GeneralInventoryPage() {
       <Drawer
         title="Record Transaction"
         placement="right"
-        width={720}
+        size={720}
         onClose={() => setTransactionDrawerVisible(false)}
         open={transactionDrawerVisible}
         footer={<div style={{ textAlign: 'right' }}><Space><Button onClick={() => setTransactionDrawerVisible(false)}>Cancel</Button><Button type="primary" onClick={handleSubmitTransaction}>Submit</Button></Space></div>}

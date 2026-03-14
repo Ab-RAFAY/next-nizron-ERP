@@ -653,18 +653,18 @@ export default function EmployeesPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Employees</h1>
-          <p className="text-gray-500 mt-1">Manage your workforce</p>
+          <h1 style={{ fontSize: 18, fontWeight: 600, margin: 0, color: '#1f1f1f' }}>Employees</h1>
+          <p style={{ fontSize: 12, color: '#8c8c8c', margin: '2px 0 0' }}>Manage your workforce</p>
         </div>
-        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate} size="large">
+        <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate} size="small">
           Add Employee
         </Button>
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Employee Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Employee Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Row gutter={[16, 16]} className="mb-6">
           <Col xs={24} sm={12}>
             <Card bordered={false} className="shadow-sm"><Statistic title="Total Employees" value={kpis.total} prefix={<TeamOutlined className="text-blue-500" />} /></Card>
@@ -691,18 +691,20 @@ export default function EmployeesPage() {
         </Card>
       </Drawer>
 
-      <div className="mb-4 flex gap-4">
+      <div className="mb-3 flex gap-2">
         <Search
           placeholder="Search by name, CNIC, FSS number..."
           allowClear
           onSearch={(value) => setFilters({ ...filters, search: value })}
-          style={{ width: 300 }}
+          style={{ width: 260 }}
+          size="small"
           prefix={<SearchOutlined />}
         />
         <Select
-          placeholder="Filter by status"
+          placeholder="Status"
           allowClear
-          style={{ width: 150 }}
+          size="small"
+          style={{ width: 120 }}
           onChange={(value) => setFilters({ ...filters, status: value || '' })}
           options={[
             { label: 'Active', value: 'Active' },
@@ -711,9 +713,10 @@ export default function EmployeesPage() {
           ]}
         />
         <Select
-          placeholder="Filter by Person Status"
+          placeholder="Person Status"
           allowClear
-          style={{ width: 150 }}
+          size="small"
+          style={{ width: 140 }}
           onChange={(value) => setFilters({ ...filters, person_status: value || '' })}
           options={[
             { label: 'Army', value: 'Army' },
@@ -725,7 +728,7 @@ export default function EmployeesPage() {
             { label: 'Civil', value: 'Civil' },
           ]}
         />
-        <Button icon={<ReloadOutlined />} onClick={() => fetchEmployees()}>
+        <Button size="small" icon={<ReloadOutlined />} onClick={() => fetchEmployees()}>
           Refresh
         </Button>
       </div>
@@ -774,7 +777,7 @@ export default function EmployeesPage() {
           };
           executeFetch();
         }}
-        scroll={{ x: 'max-content' }}
+        scroll={{ x: 'max-content', y: 'calc(100vh - 260px)' }}
         className="compact-table"
         rowClassName={(record) => (record.status === 'Inactive' || record.status === 'Suspended') ? 'inactive-row' : ''}
       />
@@ -783,7 +786,7 @@ export default function EmployeesPage() {
         title={editingEmployee ? 'Edit Employee' : 'Add Employee'}
         open={drawerVisible}
         onClose={() => setDrawerVisible(false)}
-        width={720}
+        size={720}
         destroyOnClose
       >
         <EmployeeForm
@@ -798,7 +801,7 @@ export default function EmployeesPage() {
         title={`Assign General Item - ${selectedEmployeeForAssignment?.full_name || selectedEmployeeForAssignment?.name || ''}`}
         open={generalItemDrawerVisible}
         onClose={() => setGeneralItemDrawerVisible(false)}
-        width={600}
+        size={600}
         destroyOnClose
         footer={
           <div style={{ textAlign: 'right' }}>
@@ -854,7 +857,7 @@ export default function EmployeesPage() {
         title={`Assign Restricted Item - ${selectedEmployeeForAssignment?.full_name || selectedEmployeeForAssignment?.name || ''}`}
         open={restrictedItemDrawerVisible}
         onClose={() => setRestrictedItemDrawerVisible(false)}
-        width={600}
+        size={600}
         destroyOnClose
         footer={
           <div style={{ textAlign: 'right' }}>

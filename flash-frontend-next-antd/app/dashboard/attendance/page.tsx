@@ -982,7 +982,7 @@ export default function AttendancePage() {
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Attendance Statistics" placement="right" width={720} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Attendance Statistics" placement="right" size={720} open={statsOpen} onClose={closeStats}>
         <Row gutter={[24, 24]} className="mb-8">
           <Col xs={12} sm={12}>
             <Card className="summary-stat-card bg-white border-none shadow-sm rounded-2xl"><Statistic title="Present" value={summary.present} valueStyle={{ color: '#52c41a' }} prefix={<CheckCircleOutlined />} /></Card>
@@ -1083,7 +1083,7 @@ export default function AttendancePage() {
             showSizeChanger: true,
             showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}`,
             pageSizeOptions: ['10', '20', '50', '100'],
-            position: ['bottomCenter'],
+            placement: ['bottomCenter'],
           }}
           className="premium-table"
           bordered={false}

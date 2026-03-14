@@ -281,100 +281,72 @@ export default function PurchasesPage() {
   const vendorAmounts = topVendors.map(([, amount]) => amount);
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-4 flex items-center">
-          <ShoppingOutlined className="mr-2" />
-          Purchase Management
-        </h1>
-        
-        {/* Permission Notice */}
-        {!isAdmin && (
-          <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-4">
-            <div className="flex">
-              <div className="ml-3">
-                <p className="text-sm text-blue-700">
-                  You have read-only access. Only administrators can create, edit, or delete purchases.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
-        
-        {/* Statistics Cards */}
-        <Drawer title="Purchase Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
-          <Row gutter={16} className="mb-6">
-            <Col xs={24} sm={12}><Card><div className="text-center"><div className="text-2xl font-bold text-blue-600">{totalPurchases}</div><div className="text-gray-600">Total Purchases</div></div></Card></Col>
-            <Col xs={24} sm={12}><Card><div className="text-center"><div className="text-2xl font-bold text-green-600">{completedPurchases}</div><div className="text-gray-600">Completed</div></div></Card></Col>
-            <Col xs={24} sm={12}><Card><div className="text-center"><div className="text-2xl font-bold text-orange-600">{pendingPurchases}</div><div className="text-gray-600">Pending</div></div></Card></Col>
-            <Col xs={24} sm={12}><Card><div className="text-center"><div className="text-2xl font-bold text-purple-600">${totalAmount.toFixed(2)}</div><div className="text-gray-600">Total Value</div></div></Card></Col>
-          </Row>
-          <Card title="Purchase Status Distribution" style={{ marginBottom: '16px' }}>
-            <PieChart data={{ labels: ['Completed', 'Pending', 'Approved', 'Cancelled'], datasets: [{ label: 'Purchase Status', data: [completedPurchases, pendingPurchases, approvedPurchases, cancelledPurchases], backgroundColor: ['#52c41a', '#faad14', '#1890ff', '#ff4d4f'], borderColor: ['#52c41a', '#faad14', '#1890ff', '#ff4d4f'], borderWidth: 1 }] }} title="Status Breakdown" />
-          </Card>
-          <Card title="Top Vendor Spending">
-            <BarChart data={{ labels: vendorLabels, datasets: [{ label: 'Amount ($)', data: vendorAmounts, backgroundColor: '#1890ff', borderRadius: 8 }] }} title="Spending by Vendor" horizontal />
-          </Card>
-        </Drawer>
-
-        <div className="flex justify-between items-center">
-          <Space>
-            <Search
-              placeholder="Search purchases..."
-              allowClear
-              style={{ width: 300 }}
-              onChange={(e) => setSearchText(e.target.value)}
-              prefix={<SearchOutlined />}
-            />
-            <Select
-              value={statusFilter}
-              onChange={setStatusFilter}
-              style={{ width: 120 }}
-            >
-              <Option value="all">All Status</Option>
-              <Option value="pending">Pending</Option>
-              <Option value="approved">Approved</Option>
-              <Option value="completed">Completed</Option>
-              <Option value="cancelled">Cancelled</Option>
-            </Select>
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={fetchPurchases}
-              loading={loading}
-            >
-              Refresh
-            </Button>
-          </Space>
-
-          {isAdmin && (
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={handleAddPurchase}
-            >
-              Add Purchase
-            </Button>
+    <div>
+      <div className="flex justify-between items-center mb-3">
+        <div>
+          <h1 style={{ fontSize: 18, fontWeight: 600, margin: 0, color: '#1f1f1f', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ShoppingOutlined /> Purchase Management
+          </h1>
+          {!isAdmin && (
+            <p style={{ fontSize: 11, color: '#faad14', margin: '2px 0 0' }}>Read-only: only admins can create/edit/delete</p>
           )}
         </div>
+        <Space size={6}>
+          <Search
+            placeholder="Search purchases..."
+            allowClear
+            size="small"
+            style={{ width: 220 }}
+            onChange={(e) => setSearchText(e.target.value)}
+            prefix={<SearchOutlined />}
+          />
+          <Select
+            value={statusFilter}
+            onChange={setStatusFilter}
+            size="small"
+            style={{ width: 110 }}
+          >
+            <Option value="all">All Status</Option>
+            <Option value="pending">Pending</Option>
+            <Option value="approved">Approved</Option>
+            <Option value="completed">Completed</Option>
+            <Option value="cancelled">Cancelled</Option>
+          </Select>
+          <Button size="small" icon={<ReloadOutlined />} onClick={fetchPurchases} loading={loading}>Refresh</Button>
+          {isAdmin && (
+            <Button type="primary" size="small" icon={<PlusOutlined />} onClick={handleAddPurchase}>Add Purchase</Button>
+          )}
+        </Space>
       </div>
+
+      <Drawer title="Purchase Statistics" placement="right" open={statsOpen} onClose={closeStats}>
+        <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
+          <Col xs={12}><Card size="small"><div className="text-center"><div style={{ fontSize: 20, fontWeight: 700, color: '#1677ff' }}>{totalPurchases}</div><div style={{ fontSize: 11, color: '#8c8c8c' }}>Total</div></div></Card></Col>
+          <Col xs={12}><Card size="small"><div className="text-center"><div style={{ fontSize: 20, fontWeight: 700, color: '#52c41a' }}>{completedPurchases}</div><div style={{ fontSize: 11, color: '#8c8c8c' }}>Completed</div></div></Card></Col>
+          <Col xs={12}><Card size="small"><div className="text-center"><div style={{ fontSize: 20, fontWeight: 700, color: '#faad14' }}>{pendingPurchases}</div><div style={{ fontSize: 11, color: '#8c8c8c' }}>Pending</div></div></Card></Col>
+          <Col xs={12}><Card size="small"><div className="text-center"><div style={{ fontSize: 20, fontWeight: 700, color: '#722ed1' }}>${totalAmount.toFixed(0)}</div><div style={{ fontSize: 11, color: '#8c8c8c' }}>Total Value</div></div></Card></Col>
+        </Row>
+        <PieChart data={{ labels: ['Completed', 'Pending', 'Approved', 'Cancelled'], datasets: [{ label: 'Purchase Status', data: [completedPurchases, pendingPurchases, approvedPurchases, cancelledPurchases], backgroundColor: ['#52c41a', '#faad14', '#1677ff', '#ff4d4f'], borderColor: ['#fff'], borderWidth: 1 }] }} title="Status Breakdown" />
+      </Drawer>
 
       <Table
         columns={columns}
         dataSource={filteredPurchases}
         rowKey="id"
         loading={loading}
+        size="small"
         onRow={(record) => ({
           onClick: () => handleRowClick(record),
           style: { cursor: 'pointer' }
         })}
         pagination={{
           total: filteredPurchases.length,
-          pageSize: 10,
+          pageSize: 20,
           showSizeChanger: true,
-          showQuickJumper: true,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} purchases`,
+          size: 'small',
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} purchases`,
         }}
+        scroll={{ x: 900, y: 'calc(100vh - 220px)' }}
       />
 
       {isAdmin && (

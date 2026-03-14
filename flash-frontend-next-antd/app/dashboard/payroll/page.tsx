@@ -901,7 +901,7 @@ function PayrollContent() {
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Payroll Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Payroll Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Row gutter={[24, 24]} style={{ marginBottom: '24px' }}>
           <Col xs={24} sm={12}>
             <Card style={{ borderRadius: '16px', boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)', background: 'linear-gradient(to right bottom, #f0fdf4, #ffffff)', border: '1px solid #dcfce7' }}>
@@ -1040,7 +1040,7 @@ function PayrollContent() {
                 )
               }
             ]}
-            pagination={{ pageSize: 15, position: ['bottomRight'] }}
+            pagination={{ pageSize: 15, placement: ['bottomRight'] }}
             className="premium-table"
             style={{ backgroundColor: 'white', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}
           />

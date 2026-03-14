@@ -349,7 +349,7 @@ export default function LeaveManagementPage() {
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Leave Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Leave Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Row gutter={16} style={{ marginBottom: '24px' }}>
           <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Leaves</span>} value={totalLeaves} valueStyle={{ fontSize: '20px' }} prefix={<CalendarOutlined />} /></Card></Col>
           <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Days</span>} value={totalDays} valueStyle={{ fontSize: '20px', color: '#1890ff' }} /></Card></Col>

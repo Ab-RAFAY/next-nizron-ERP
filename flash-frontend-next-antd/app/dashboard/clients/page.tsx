@@ -204,28 +204,22 @@ export default function ClientsPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <h1 style={{ fontSize: 18, fontWeight: 600, margin: 0, color: '#1f1f1f', display: 'flex', alignItems: 'center', gap: 6 }}>
             <TeamOutlined /> Clients
           </h1>
-          <p className="text-gray-500 mt-1">Manage your clients and contracts</p>
+          <p style={{ fontSize: 12, color: '#8c8c8c', margin: '2px 0 0' }}>Manage your clients and contracts</p>
         </div>
-        <Space>
-          <Button icon={<ReloadOutlined />} onClick={() => fetchClients()}>
-            Refresh
-          </Button>
-          <Button onClick={() => setIndustriesModalVisible(true)}>
-            Manage Industries
-          </Button>
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate} size="large">
-            Add Client
-          </Button>
+        <Space size={6}>
+          <Button size="small" icon={<ReloadOutlined />} onClick={() => fetchClients()}>Refresh</Button>
+          <Button size="small" onClick={() => setIndustriesModalVisible(true)}>Industries</Button>
+          <Button type="primary" size="small" icon={<PlusOutlined />} onClick={handleCreate}>Add Client</Button>
         </Space>
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Client Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Client Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Card title="Industry Distribution" bordered={false} className="shadow-sm" style={{ marginBottom: '16px' }}>
           <PieChart data={{ labels: Array.from(new Set(clients.map(c => c.industry || 'Unknown'))), datasets: [{ label: 'Clients', data: Array.from(new Set(clients.map(c => c.industry || 'Unknown'))).map(ind => clients.filter(c => (c.industry || 'Unknown') === ind).length), backgroundColor: ['#1890ff', '#722ed1', '#13c2c2', '#faad14', '#52c41a', '#ff4d4f'], borderColor: ['#fff'], borderWidth: 2 }] }} />
         </Card>
@@ -234,13 +228,14 @@ export default function ClientsPage() {
         </Card>
       </Drawer>
 
-      <div className="mb-4">
+      <div className="mb-3">
         <Search
           placeholder="Search by name, company, email, or phone..."
           allowClear
           value={searchText}
           onChange={(e) => setSearchText(e.target.value)}
-          style={{ width: 400 }}
+          style={{ width: 320 }}
+          size="small"
           prefix={<SearchOutlined />}
         />
       </div>
@@ -251,7 +246,7 @@ export default function ClientsPage() {
         rowKey="id"
         loading={loading}
         size="small"
-        scroll={{ x: 1200 }}
+        scroll={{ x: 1200, y: 'calc(100vh - 250px)' }}
         className="compact-table"
       />
 
@@ -259,7 +254,7 @@ export default function ClientsPage() {
         title={editingClient ? 'Edit Client' : 'Add Client'}
         open={drawerVisible}
         onClose={() => setDrawerVisible(false)}
-        width={720}
+        size={720}
         destroyOnClose
       >
         <ClientForm

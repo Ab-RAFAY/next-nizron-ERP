@@ -183,11 +183,11 @@ export default function DashboardHome() {
   ];
 
   return (
-    <div style={{ padding: '24px' }}>
-      <h2 style={{ marginBottom: '24px', fontSize: '24px', fontWeight: 600 }}>Dashboard Overview</h2>
+    <div>
+      <h2 style={{ marginBottom: 16, fontSize: 18, fontWeight: 600, color: '#1f1f1f' }}>Dashboard Overview</h2>
 
       {/* Stats Drawer */}
-      <Drawer title="Dashboard Statistics" placement="right" width={720} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Dashboard Statistics" placement="right" size={720} open={statsOpen} onClose={closeStats}>
         <Row gutter={[16, 16]} style={{ marginBottom: '24px' }}>
           <Col xs={24} sm={12}>
             <Card loading={loading}>

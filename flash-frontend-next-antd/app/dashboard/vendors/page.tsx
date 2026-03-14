@@ -214,73 +214,54 @@ export default function VendorsPage() {
   const categoryColors = ['#1890ff', '#52c41a', '#faad14', '#ff4d4f', '#722ed1', '#13c2c2', '#eb2f96', '#fa8c16'];
 
   return (
-    <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold mb-4 flex items-center">
-          <ShopOutlined className="mr-2" />
-          Vendor Management
-        </h1>
-        
-        {/* Statistics Cards */}
-        <Drawer title="Vendor Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
-          <Row gutter={16} className="mb-6">
-            <Col xs={24} sm={8}><Card><div className="text-center"><div className="text-2xl font-bold text-blue-600">{totalVendors}</div><div className="text-gray-600">Total Vendors</div></div></Card></Col>
-            <Col xs={24} sm={8}><Card><div className="text-center"><div className="text-2xl font-bold text-green-600">{activeVendors}</div><div className="text-gray-600">Active Vendors</div></div></Card></Col>
-            <Col xs={24} sm={8}><Card><div className="text-center"><div className="text-2xl font-bold text-red-600">{inactiveVendors}</div><div className="text-gray-600">Inactive Vendors</div></div></Card></Col>
-          </Row>
-          <Card title="Vendor Status" style={{ marginBottom: '16px' }}>
-            <PieChart data={{ labels: ['Active', 'Inactive'], datasets: [{ label: 'Vendor Status', data: [activeVendors, inactiveVendors], backgroundColor: ['#52c41a', '#ff4d4f'], borderColor: ['#52c41a', '#ff4d4f'], borderWidth: 1 }] }} title="Status Distribution" />
-          </Card>
-          <Card title="Vendors by Category">
-            <BarChart data={{ labels: categoryLabels, datasets: [{ label: 'Vendors', data: categoryCounts, backgroundColor: categoryColors.slice(0, categoryLabels.length), borderRadius: 8 }] }} title="Category Breakdown" />
-          </Card>
-        </Drawer>
-
-        <div className="flex justify-between items-center">
-          <Space>
-            <Search
-              placeholder="Search vendors..."
-              allowClear
-              style={{ width: 300 }}
-              onChange={(e) => setSearchText(e.target.value)}
-              prefix={<SearchOutlined />}
-            />
-            <Button
-              icon={<ReloadOutlined />}
-              onClick={fetchVendors}
-              loading={loading}
-            >
-              Refresh
-            </Button>
-          </Space>
-
-          <Button
-            type="primary"
-            icon={<PlusOutlined />}
-            onClick={handleAddVendor}
-          >
-            Add Vendor
-          </Button>
+    <div>
+      <div className="flex justify-between items-center mb-3">
+        <div>
+          <h1 style={{ fontSize: 18, fontWeight: 600, margin: 0, color: '#1f1f1f', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <ShopOutlined /> Vendor Management
+          </h1>
         </div>
+        <Space size={6}>
+          <Search
+            placeholder="Search vendors..."
+            allowClear
+            style={{ width: 240 }}
+            size="small"
+            onChange={(e) => setSearchText(e.target.value)}
+            prefix={<SearchOutlined />}
+          />
+          <Button size="small" icon={<ReloadOutlined />} onClick={fetchVendors} loading={loading}>Refresh</Button>
+          <Button type="primary" size="small" icon={<PlusOutlined />} onClick={handleAddVendor}>Add Vendor</Button>
+        </Space>
       </div>
+
+      <Drawer title="Vendor Statistics" placement="right" open={statsOpen} onClose={closeStats}>
+        <Row gutter={[12, 12]} style={{ marginBottom: 12 }}>
+          <Col xs={24} sm={8}><Card size="small"><div className="text-center"><div style={{ fontSize: 22, fontWeight: 700, color: '#1677ff' }}>{totalVendors}</div><div style={{ fontSize: 11, color: '#8c8c8c' }}>Total</div></div></Card></Col>
+          <Col xs={24} sm={8}><Card size="small"><div className="text-center"><div style={{ fontSize: 22, fontWeight: 700, color: '#52c41a' }}>{activeVendors}</div><div style={{ fontSize: 11, color: '#8c8c8c' }}>Active</div></div></Card></Col>
+          <Col xs={24} sm={8}><Card size="small"><div className="text-center"><div style={{ fontSize: 22, fontWeight: 700, color: '#ff4d4f' }}>{inactiveVendors}</div><div style={{ fontSize: 11, color: '#8c8c8c' }}>Inactive</div></div></Card></Col>
+        </Row>
+        <PieChart data={{ labels: ['Active', 'Inactive'], datasets: [{ label: 'Status', data: [activeVendors, inactiveVendors], backgroundColor: ['#52c41a', '#ff4d4f'], borderColor: ['#52c41a', '#ff4d4f'], borderWidth: 1 }] }} title="Status Distribution" />
+      </Drawer>
 
       <Table
         columns={columns}
         dataSource={filteredVendors}
         rowKey="id"
         loading={loading}
+        size="small"
         onRow={(record) => ({
           onClick: () => handleRowClick(record),
           style: { cursor: 'pointer' }
         })}
         pagination={{
           total: filteredVendors.length,
-          pageSize: 10,
+          pageSize: 20,
           showSizeChanger: true,
-          showQuickJumper: true,
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} vendors`,
+          size: 'small',
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} vendors`,
         }}
+        scroll={{ x: 900, y: 'calc(100vh - 220px)' }}
       />
 
       <Drawer

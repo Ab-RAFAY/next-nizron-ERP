@@ -305,7 +305,7 @@ export default function VehicleDetailPage() {
         </div>
       </Card>
 
-      {vehicle?.fuel_limit_monthly && (
+      {vehicle?.fuel_limit_monthly !== undefined && vehicle?.fuel_limit_monthly !== null && Number(vehicle.fuel_limit_monthly) > 0 && (
         <Card className="mb-6" title="Monthly Fuel Monitoring" loading={loadingFuelData}>
           <Row gutter={16}>
             <Col span={8}>
@@ -420,7 +420,7 @@ export default function VehicleDetailPage() {
         ]}
       />
 
-      <Drawer title="Edit Vehicle" open={editDrawerVisible} onClose={() => setEditDrawerVisible(false)} width={720} destroyOnClose>
+      <Drawer title="Edit Vehicle" open={editDrawerVisible} onClose={() => setEditDrawerVisible(false)} size={720} destroyOnClose>
         <VehicleForm initialValues={vehicle} onSubmit={handleUpdate} onCancel={() => setEditDrawerVisible(false)} />
       </Drawer>
 
@@ -428,7 +428,7 @@ export default function VehicleDetailPage() {
         title={`Upload ${uploadType === 'document' ? 'Document' : 'Image'}`}
         open={uploadDrawerVisible}
         onClose={() => setUploadDrawerVisible(false)}
-        width={480}
+        size={480}
         footer={
           <div style={{ textAlign: 'right' }}>
             <Button onClick={() => setUploadDrawerVisible(false)} style={{ marginRight: 8 }}>Cancel</Button>
@@ -456,7 +456,7 @@ export default function VehicleDetailPage() {
         title="Preview"
         open={previewVisible}
         onClose={() => setPreviewVisible(false)}
-        width={900}
+        size={900}
         footer={
           <div style={{ textAlign: 'right' }}>
             <Button icon={<DownloadOutlined />} href={previewFile} target="_blank" style={{ marginRight: 8 }}>Download</Button>

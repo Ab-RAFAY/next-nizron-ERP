@@ -546,7 +546,7 @@ export default function ClientDetailPage() {
         ]}
       />
 
-      <Drawer title="Edit Client" open={editDrawerVisible} onClose={() => setEditDrawerVisible(false)} width={720} destroyOnClose>
+      <Drawer title="Edit Client" open={editDrawerVisible} onClose={() => setEditDrawerVisible(false)} size={720} destroyOnClose>
         <ClientForm initialValues={client} onSubmit={handleUpdate} onCancel={() => setEditDrawerVisible(false)} />
       </Drawer>
 
@@ -661,7 +661,7 @@ export default function ClientDetailPage() {
         title="Contract Documents"
         open={documentsModalVisible}
         onCancel={() => setDocumentsModalVisible(false)}
-        width={700}
+        size={700}
         footer={[
           <Button key="close" onClick={() => setDocumentsModalVisible(false)}>
             Close

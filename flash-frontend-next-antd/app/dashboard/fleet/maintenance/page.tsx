@@ -234,7 +234,7 @@ export default function VehicleMaintenancePage() {
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Maintenance Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Maintenance Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Row gutter={16} style={{ marginBottom: '24px' }}>
           <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Records</span>} value={filteredRecords.length} valueStyle={{ fontSize: '20px' }} prefix={<ToolOutlined />} /></Card></Col>
           <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Cost</span>} value={totalCost} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix="Rs." /></Card></Col>
@@ -254,7 +254,7 @@ export default function VehicleMaintenancePage() {
       <Drawer
         title={editingRecord ? 'Edit Record' : 'Add Record'}
         placement="right"
-        width={720}
+        size={720}
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         footer={<div style={{ textAlign: 'right' }}><Space><Button onClick={() => setDrawerVisible(false)}>Cancel</Button><Button type="primary" onClick={handleSubmit}>{editingRecord ? 'Update' : 'Create'}</Button></Space></div>}

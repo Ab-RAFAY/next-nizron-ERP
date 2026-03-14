@@ -213,7 +213,7 @@ export default function AdvancesPage() {
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Advance Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Advance Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Row gutter={16} style={{ marginBottom: '24px' }}>
           <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Advances</span>} value={totalAdvances} valueStyle={{ fontSize: '20px', color: '#ff4d4f' }} prefix={<DollarOutlined />} suffix="Rs." /></Card></Col>
           <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Active Advances</span>} value={activeAdvances} valueStyle={{ fontSize: '20px', color: '#faad14' }} prefix={<ClockCircleOutlined />} /></Card></Col>
@@ -246,7 +246,7 @@ export default function AdvancesPage() {
       <Drawer
         title="Add Advance"
         placement="right"
-        width={720}
+        size={720}
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         footer={

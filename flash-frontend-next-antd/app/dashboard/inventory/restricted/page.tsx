@@ -660,7 +660,7 @@ export default function RestrictedInventoryPage() {
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Restricted Inventory Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Restricted Inventory Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Row gutter={16} style={{ marginBottom: '24px' }}>
           <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Items</span>} value={totalItems} valueStyle={{ fontSize: '20px' }} prefix={<SafetyOutlined />} /></Card></Col>
           <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Units</span>} value={totalUnits} valueStyle={{ fontSize: '20px', color: '#1890ff' }} prefix={<LockOutlined />} /></Card></Col>
@@ -688,7 +688,7 @@ export default function RestrictedInventoryPage() {
       <Drawer
         title={editingItem ? 'Edit Item' : 'Add Item'}
         placement="right"
-        width={720}
+        size={720}
         onClose={() => setItemDrawerVisible(false)}
         open={itemDrawerVisible}
         footer={<div style={{ textAlign: 'right' }}><Space><Button onClick={() => setItemDrawerVisible(false)}>Cancel</Button><Button type="primary" onClick={handleSubmitItem}>{editingItem ? 'Update' : 'Create'}</Button></Space></div>}
@@ -728,7 +728,7 @@ export default function RestrictedInventoryPage() {
       <Drawer
         title="Record Transaction"
         placement="right"
-        width={720}
+        size={720}
         onClose={() => setTransactionDrawerVisible(false)}
         open={transactionDrawerVisible}
         footer={<div style={{ textAlign: 'right' }}><Space><Button onClick={() => setTransactionDrawerVisible(false)}>Cancel</Button><Button type="primary" onClick={handleSubmitTransaction}>Submit</Button></Space></div>}
@@ -764,7 +764,7 @@ export default function RestrictedInventoryPage() {
       <Drawer
         title="Return Item"
         placement="right"
-        width={720}
+        size={720}
         onClose={() => setReturnDrawerVisible(false)}
         open={returnDrawerVisible}
         footer={<div style={{ textAlign: 'right' }}><Space><Button onClick={() => setReturnDrawerVisible(false)}>Cancel</Button><Button type="primary" onClick={handleSubmitReturn}>Submit</Button></Space></div>}

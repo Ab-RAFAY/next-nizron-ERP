@@ -263,7 +263,7 @@ export default function FinancePage() {
       </div>
 
       {/* Stats Drawer */}
-      <Drawer title="Finance Statistics" placement="right" width={620} open={statsOpen} onClose={closeStats}>
+      <Drawer title="Finance Statistics" placement="right" size={620} open={statsOpen} onClose={closeStats}>
         <Row gutter={16} style={{ marginBottom: '24px' }}>
           <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Income</span>} value={totalIncome} valueStyle={{ fontSize: '20px', color: '#52c41a' }} prefix={<RiseOutlined />} suffix="Rs." /></Card></Col>
           <Col span={12}><Card><Statistic title={<span style={{ fontSize: '12px' }}>Total Expenses</span>} value={totalExpenses} valueStyle={{ fontSize: '20px', color: '#ff4d4f' }} prefix={<FallOutlined />} suffix="Rs." /></Card></Col>
@@ -311,7 +311,7 @@ export default function FinancePage() {
       <Drawer
         title={editingRecord ? `Edit ${transactionType === 'income' ? 'Income' : 'Expense'}` : `Add ${transactionType === 'income' ? 'Income' : 'Expense'}`}
         placement="right"
-        width={720}
+        size={720}
         onClose={() => setDrawerVisible(false)}
         open={drawerVisible}
         footer={

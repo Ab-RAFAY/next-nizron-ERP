@@ -24,9 +24,9 @@ import {
   BulbOutlined,
   ShoppingOutlined,
   MessageOutlined,
+  BarChartOutlined,
 } from '@ant-design/icons';
 import { useRouter, usePathname } from 'next/navigation';
-import { BarChartOutlined } from '@ant-design/icons';
 import { useAuth } from '@/lib/auth';
 import { StatsDrawerProvider, useStatsDrawer } from '@/lib/stats-drawer-context';
 import type { MenuProps } from 'antd';
@@ -78,26 +78,10 @@ function DashboardLayoutInner({
       label: 'Human Resources',
       hidden: !user.is_superuser && !user.permissions?.includes('hr'),
       children: [
-        {
-          key: '/dashboard/employees',
-          icon: <UserOutlined />,
-          label: 'Employees',
-        },
-        {
-          key: '/dashboard/attendance',
-          icon: <ClockCircleOutlined />,
-          label: 'Attendance',
-        },
-        {
-          key: '/dashboard/leave',
-          icon: <CalendarOutlined />,
-          label: 'Long Leave',
-        },
-        {
-          key: '/dashboard/payroll',
-          icon: <DollarOutlined />,
-          label: 'Payroll',
-        },
+        { key: '/dashboard/employees', icon: <UserOutlined />, label: 'Employees' },
+        { key: '/dashboard/attendance', icon: <ClockCircleOutlined />, label: 'Attendance' },
+        { key: '/dashboard/leave', icon: <CalendarOutlined />, label: 'Long Leave' },
+        { key: '/dashboard/payroll', icon: <DollarOutlined />, label: 'Payroll' },
       ],
     },
     {
@@ -106,26 +90,10 @@ function DashboardLayoutInner({
       label: 'Fleet Management',
       hidden: !user.is_superuser && !user.permissions?.includes('fleet'),
       children: [
-        {
-          key: '/dashboard/vehicles',
-          icon: <CarOutlined />,
-          label: 'Vehicles',
-        },
-        {
-          key: '/dashboard/fleet/assignments',
-          icon: <FileDoneOutlined />,
-          label: 'Assignments',
-        },
-        {
-          key: '/dashboard/fleet/fuel-entries',
-          icon: <DollarOutlined />,
-          label: 'Fuel Entries',
-        },
-        {
-          key: '/dashboard/fleet/maintenance',
-          icon: <ToolOutlined />,
-          label: 'Maintenance',
-        },
+        { key: '/dashboard/vehicles', icon: <CarOutlined />, label: 'Vehicles' },
+        { key: '/dashboard/fleet/assignments', icon: <FileDoneOutlined />, label: 'Assignments' },
+        { key: '/dashboard/fleet/fuel-entries', icon: <DollarOutlined />, label: 'Fuel Entries' },
+        { key: '/dashboard/fleet/maintenance', icon: <ToolOutlined />, label: 'Maintenance' },
       ],
     },
     {
@@ -134,36 +102,12 @@ function DashboardLayoutInner({
       label: 'Operations',
       hidden: !user.is_superuser && !user.permissions?.includes('operations'),
       children: [
-        {
-          key: '/dashboard/clients',
-          icon: <ShopOutlined />,
-          label: 'Clients',
-        },
-        {
-          key: '/dashboard/clients/complaints',
-          icon: <BulbOutlined />,
-          label: 'Complaints',
-        },
-        {
-          key: '/dashboard/vendors',
-          icon: <TeamOutlined />,
-          label: 'Vendors',
-        },
-        {
-          key: '/dashboard/purchases',
-          icon: <ShoppingOutlined />,
-          label: 'Purchases',
-        },
-        {
-          key: '/dashboard/finance',
-          icon: <WalletOutlined />,
-          label: 'Finance',
-        },
-        {
-          key: '/dashboard/finance/advances',
-          icon: <DollarOutlined />,
-          label: 'Advances',
-        },
+        { key: '/dashboard/clients', icon: <ShopOutlined />, label: 'Clients' },
+        { key: '/dashboard/clients/complaints', icon: <BulbOutlined />, label: 'Complaints' },
+        { key: '/dashboard/vendors', icon: <TeamOutlined />, label: 'Vendors' },
+        { key: '/dashboard/purchases', icon: <ShoppingOutlined />, label: 'Purchases' },
+        { key: '/dashboard/finance', icon: <WalletOutlined />, label: 'Finance' },
+        { key: '/dashboard/finance/advances', icon: <DollarOutlined />, label: 'Advances' },
       ],
     },
     {
@@ -178,16 +122,8 @@ function DashboardLayoutInner({
       label: 'Inventory',
       hidden: !user.is_superuser && !user.permissions?.includes('inventory'),
       children: [
-        {
-          key: '/dashboard/inventory/general',
-          icon: <ToolOutlined />,
-          label: 'General Items',
-        },
-        {
-          key: '/dashboard/inventory/restricted',
-          icon: <SafetyOutlined />,
-          label: 'Restricted Items',
-        },
+        { key: '/dashboard/inventory/general', icon: <ToolOutlined />, label: 'General Items' },
+        { key: '/dashboard/inventory/restricted', icon: <SafetyOutlined />, label: 'Restricted Items' },
       ],
     },
     {
@@ -202,58 +138,64 @@ function DashboardLayoutInner({
       label: 'Administration',
       hidden: !user.is_superuser && !user.permissions?.includes('administration'),
       children: [
-        {
-          key: '/dashboard/administration/roles',
-          icon: <SafetyOutlined />,
-          label: 'Roles & Permissions',
-        },
+        { key: '/dashboard/administration/roles', icon: <SafetyOutlined />, label: 'Roles & Permissions' },
       ],
     },
-  ].filter(item => !(item as any).hidden);
+  ].filter((item) => !(item as any).hidden);
 
   const userMenuItems: MenuProps['items'] = [
-    {
-      key: 'profile',
-      icon: <UserOutlined />,
-      label: 'Profile',
-    },
-    {
-      key: 'settings',
-      icon: <SettingOutlined />,
-      label: 'Settings',
-    },
-    {
-      type: 'divider',
-    },
-    {
-      key: 'logout',
-      icon: <LogoutOutlined />,
-      label: 'Logout',
-      onClick: logout,
-    },
+    { key: 'profile', icon: <UserOutlined />, label: 'Profile' },
+    { key: 'settings', icon: <SettingOutlined />, label: 'Settings' },
+    { type: 'divider' },
+    { key: 'logout', icon: <LogoutOutlined />, label: 'Logout', onClick: logout },
   ];
 
   return (
-    <Layout className="min-h-screen">
+    <Layout style={{ minHeight: '100vh' }}>
+      {/* ─── Sidebar ────────────────────────────────── */}
       <Sider
         trigger={null}
         collapsible
         collapsed={collapsed}
         theme="dark"
-        width={250}
+        width={232}
+        collapsedWidth={60}
         style={{
-          overflow: 'auto',
+          overflow: 'hidden',
           height: '100vh',
           position: 'fixed',
           left: 0,
           top: 0,
           bottom: 0,
+          background: '#001529',
+          boxShadow: '2px 0 8px rgba(0,0,0,0.15)',
         }}
       >
-        <div className="h-24 flex items-center justify-center border-b border-gray-700 py-4">
+        {/* Logo */}
+        <div
+          style={{
+            height: 52,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            borderBottom: '1px solid rgba(255,255,255,0.06)',
+            padding: '0 12px',
+            overflow: 'hidden',
+          }}
+        >
           <div
-            className="bg-white p-2 rounded-xl shadow-lg flex items-center justify-center"
-            style={{ width: collapsed ? 48 : 120, height: collapsed ? 48 : 64, transition: 'all 0.2s' }}
+            style={{
+              background: '#fff',
+              borderRadius: 6,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              width: collapsed ? 36 : 110,
+              height: collapsed ? 36 : 38,
+              transition: 'all 0.2s',
+              flexShrink: 0,
+              overflow: 'hidden',
+            }}
           >
             <img
               src="/images/images.png"
@@ -262,6 +204,7 @@ function DashboardLayoutInner({
             />
           </div>
         </div>
+
         <Menu
           theme="dark"
           mode="inline"
@@ -269,64 +212,113 @@ function DashboardLayoutInner({
           defaultOpenKeys={['hr', 'fleet', 'operations', 'inventory']}
           items={menuItems}
           onClick={({ key }) => {
-            if (key.startsWith('/')) {
-              router.push(key);
-            }
+            if (key.startsWith('/')) router.push(key);
           }}
-          style={{ borderRight: 0 }}
+          style={{
+            borderRight: 0,
+            paddingTop: 6,
+            fontSize: 13,
+            background: '#001529',
+          }}
         />
       </Sider>
-      <Layout style={{ marginLeft: collapsed ? 80 : 250, transition: 'all 0.2s' }}>
+
+      {/* ─── Main Area ──────────────────────────────── */}
+      <Layout
+        style={{
+          marginLeft: collapsed ? 60 : 232,
+          transition: 'margin-left 0.2s',
+          minHeight: '100vh',
+          background: '#f5f5f5',
+        }}
+      >
+        {/* Header */}
         <Header
-          className="bg-white px-6 flex items-center justify-between shadow-sm"
           style={{
+            background: '#ffffff',
+            padding: '0 16px',
+            height: 50,
+            lineHeight: '50px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
             position: 'sticky',
             top: 0,
-            zIndex: 1,
-            width: '100%',
-            padding: '0 24px',
+            zIndex: 100,
+            boxShadow: '0 1px 4px rgba(0,0,0,0.08)',
+            borderBottom: '1px solid #f0f0f0',
           }}
         >
+          {/* Toggle button */}
           <Button
             type="text"
+            size="small"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
-            className="text-lg"
+            style={{ fontSize: 16, color: '#595959' }}
           />
-          <Space size="large">
+
+          {/* Right section */}
+          <Space size={8}>
             <Button
-              type="primary"
+              type="default"
+              size="small"
               icon={<BarChartOutlined />}
               onClick={toggleStats}
-              style={{ borderRadius: '8px' }}
+              style={{ fontSize: 12, borderRadius: 4 }}
             >
-              Show Stats
+              Stats
             </Button>
+
             <Badge count={0} showZero={false}>
-              <Button type="text" icon={<BellOutlined style={{ fontSize: '18px' }} />} />
+              <Button
+                type="text"
+                size="small"
+                icon={<BellOutlined style={{ fontSize: 16, color: '#595959' }} />}
+              />
             </Badge>
+
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
-              <div className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded">
-                <Avatar icon={<UserOutlined />} style={{ backgroundColor: '#1890ff' }} />
-                <div className="flex flex-col">
-                  <span className="text-sm font-medium">{user.name || 'Admin'}</span>
-                  <span className="text-xs text-gray-500">{user.email}</span>
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 8,
+                  cursor: 'pointer',
+                  padding: '4px 8px',
+                  borderRadius: 4,
+                  transition: 'background 0.2s',
+                }}
+                className="hover:bg-gray-50"
+              >
+                <Avatar
+                  size={28}
+                  icon={<UserOutlined />}
+                  style={{ backgroundColor: '#1677ff', flexShrink: 0 }}
+                />
+                <div style={{ lineHeight: 1.3 }}>
+                  <div style={{ fontSize: 12, fontWeight: 600, color: '#1f1f1f' }}>
+                    {user.name || 'Admin'}
+                  </div>
+                  <div style={{ fontSize: 11, color: '#8c8c8c' }}>{user.email}</div>
                 </div>
               </div>
             </Dropdown>
           </Space>
         </Header>
+
+        {/* Content */}
         <Content
           style={{
-            margin: '24px',
-            padding: '24px',
-            background: '#f0f2f5',
-            minHeight: 'calc(100vh - 64px)',
+            margin: '14px 14px 14px',
+            padding: '16px',
+            background: '#ffffff',
+            borderRadius: 6,
+            minHeight: 'calc(100vh - 78px)',
+            boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
           }}
         >
-          <div className="bg-white rounded-lg p-6 shadow-sm">
-            {children}
-          </div>
+          {children}
         </Content>
       </Layout>
     </Layout>

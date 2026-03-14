@@ -156,16 +156,16 @@ export default function RolesPage() {
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex justify-between items-center mb-3">
         <div>
-          <h1 className="text-2xl font-bold text-gray-800">Roles & Permissions</h1>
-          <p className="text-gray-500 mt-1">Manage user roles and module access</p>
+          <h1 style={{ fontSize: 18, fontWeight: 600, margin: 0, color: '#1f1f1f' }}>Roles & Permissions</h1>
+          <p style={{ fontSize: 12, color: '#8c8c8c', margin: '2px 0 0' }}>Manage user roles and module access</p>
         </div>
         <Button
           type="primary"
+          size="small"
           icon={<PlusOutlined />}
           onClick={handleCreate}
-          size="large"
         >
           Create Role
         </Button>
@@ -177,7 +177,9 @@ export default function RolesPage() {
           dataSource={roles}
           rowKey="id"
           loading={loading}
+          size="small"
           pagination={false}
+          scroll={{ y: 'calc(100vh - 220px)' }}
         />
       </Card>
 
