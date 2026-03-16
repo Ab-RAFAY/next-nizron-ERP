@@ -1,9 +1,22 @@
 
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ActivityIndicator, KeyboardAvoidingView, Platform, ScrollView, Image } from 'react-native';
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Image,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { CONFIG } from '../constants/config';
 import { SplashOverlay } from '../components/SplashOverlay';
 
@@ -13,6 +26,7 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [showSplash, setShowSplash] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
 
   const formatCNIC = (text: string) => {
@@ -43,7 +57,6 @@ export default function LoginScreen() {
       Alert.alert('Required Fields', `Please enter your ${isClient ? 'email' : 'FSS Number or CNIC'} and password.`);
       return;
     }
-
     setLoading(true);
     try {
       const endpoint = isClient ? '/auth/client-login' : '/auth/employee-login';
@@ -60,7 +73,6 @@ export default function LoginScreen() {
         const token = data.token || data.access_token;
         await AsyncStorage.setItem('token', token);
         await AsyncStorage.setItem('user_type', isClient ? 'client' : 'employee');
-
         if (isClient) {
           await AsyncStorage.setItem('client_id', String(data.client_id));
           await AsyncStorage.setItem('full_name', data.name || '');
@@ -84,275 +96,353 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.mainContainer}
+      style={styles.root}
     >
       <SplashOverlay
         visible={showSplash}
         onFinish={() => router.replace(isClient ? '/(client-tabs)' : '/(tabs)')}
       />
-      <SafeAreaView style={{ flex: 1, backgroundColor: '#eff6ff' }} edges={['top', 'left', 'right']}>
-        <View style={styles.backgroundGradient}>
-          <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
-            <View style={styles.headerSection}>
-              <View style={styles.logoContainer}>
-                <Image
-                  source={require('../assets/images/images.png')}
-                  style={styles.logoImage}
-                  resizeMode="contain"
+
+      {/* Dark gradient background */}
+      <View style={styles.bgLayer} />
+
+      <SafeAreaView style={styles.safe} edges={['top', 'left', 'right']}>
+        <ScrollView
+          contentContainerStyle={styles.scroll}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Brand mark */}
+          <View style={styles.brandSection}>
+            <View style={styles.logoBox}>
+              <Image
+                source={require('../assets/images/images.png')}
+                style={styles.logoImg}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.brandName}>NIZRON TECH ERP</Text>
+            <Text style={styles.brandTagline}>Enterprise Resource Platform</Text>
+          </View>
+
+          {/* Login Card */}
+          <View style={styles.card}>
+            {/* Tab Switcher */}
+            <View style={styles.tabRow}>
+              <TouchableOpacity
+                style={[styles.tabPill, !isClient && styles.tabPillActive]}
+                onPress={() => { setIsClient(false); setFssNo(''); }}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name="person-outline"
+                  size={14}
+                  color={!isClient ? '#ffffff' : '#94a3b8'}
+                  style={{ marginRight: 5 }}
                 />
-              </View>
-              <Text style={styles.welcomeTitle}>Nizron Tech ERP</Text>
-              <Text style={styles.welcomeSubtitle}>{isClient ? 'Client Portal' : 'Employee Portal'}</Text>
+                <Text style={[styles.tabPillText, !isClient && styles.tabPillTextActive]}>
+                  Employee
+                </Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={[styles.tabPill, isClient && styles.tabPillClientActive]}
+                onPress={() => { setIsClient(true); setFssNo(''); }}
+                activeOpacity={0.7}
+              >
+                <Ionicons
+                  name="business-outline"
+                  size={14}
+                  color={isClient ? '#ffffff' : '#94a3b8'}
+                  style={{ marginRight: 5 }}
+                />
+                <Text style={[styles.tabPillText, isClient && styles.tabPillTextActive]}>
+                  Client
+                </Text>
+              </TouchableOpacity>
             </View>
 
-            <View style={styles.loginCard}>
-              <View style={styles.tabContainer}>
-                <TouchableOpacity
-                  style={[styles.tab, !isClient && styles.activeTab]}
-                  onPress={() => { setIsClient(false); setFssNo(''); }}
-                >
-                  <Text style={[styles.tabText, !isClient && styles.activeTabText]}>Employee</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[styles.tab, isClient && styles.activeTab]}
-                  onPress={() => { setIsClient(true); setFssNo(''); }}
-                >
-                  <Text style={[styles.tabText, isClient && styles.activeTabText]}>Client</Text>
-                </TouchableOpacity>
-              </View>
+            <Text style={styles.cardTitle}>
+              {isClient ? 'Client Sign In' : 'Employee Sign In'}
+            </Text>
+            <Text style={styles.cardSub}>
+              {isClient
+                ? 'Access your sites, guards and reports.'
+                : 'Manage your attendance and daily tasks.'}
+            </Text>
 
-              <Text style={styles.cardTitle}>{isClient ? 'Client Sign In' : 'Sign In'}</Text>
-              <Text style={styles.inputHint}>
-                {isClient ? 'View your sites, guards and attendance data.' : 'Enter your credentials to manage your attendance and tasks.'}
+            {/* Identifier */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>
+                {isClient ? 'EMAIL ADDRESS' : 'FSS NO. / CNIC'}
               </Text>
-
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>{isClient ? 'EMAIL ADDRESS' : 'FSS NUMBER / CNIC'}</Text>
+              <View style={styles.inputWrap}>
+                <Ionicons
+                  name={isClient ? 'mail-outline' : 'card-outline'}
+                  size={16}
+                  color="#94a3b8"
+                  style={styles.inputIcon}
+                />
                 <TextInput
-                  style={styles.input}
-                  placeholder={isClient ? "email@example.com" : "000 or 1111-42347771-1"}
+                  style={styles.textInput}
+                  placeholder={isClient ? 'email@example.com' : '000 or 1111-42347771-1'}
                   placeholderTextColor="#94a3b8"
                   value={fssNo}
                   onChangeText={handleIdentifierChange}
                   autoCapitalize="none"
-                  keyboardType={isClient ? "email-address" : "numeric"}
+                  keyboardType={isClient ? 'email-address' : 'numeric'}
                 />
               </View>
+            </View>
 
-              <View style={styles.inputGroup}>
-                <Text style={styles.label}>PASSWORD</Text>
+            {/* Password */}
+            <View style={styles.fieldGroup}>
+              <Text style={styles.fieldLabel}>PASSWORD</Text>
+              <View style={styles.inputWrap}>
+                <Ionicons name="lock-closed-outline" size={16} color="#94a3b8" style={styles.inputIcon} />
                 <TextInput
-                  style={styles.input}
+                  style={[styles.textInput, { flex: 1 }]}
                   placeholder="••••••••"
                   placeholderTextColor="#94a3b8"
                   value={password}
                   onChangeText={setPassword}
-                  secureTextEntry
+                  secureTextEntry={!showPassword}
                 />
+                <TouchableOpacity onPress={() => setShowPassword(!showPassword)} style={styles.eyeBtn}>
+                  <Ionicons name={showPassword ? 'eye-outline' : 'eye-off-outline'} size={16} color="#94a3b8" />
+                </TouchableOpacity>
               </View>
-
-              <TouchableOpacity
-                style={[styles.loginButton, loading && styles.buttonDisabled]}
-                onPress={handleLogin}
-                disabled={loading}
-                activeOpacity={0.8}
-              >
-                {loading ? (
-                  <ActivityIndicator color="#fff" />
-                ) : (
-                  <Text style={styles.loginButtonText}>CONTINUE</Text>
-                )}
-              </TouchableOpacity>
             </View>
 
-            <View style={styles.footerSection}>
-              <Text style={styles.footerText}>Authorized Personnel Only</Text>
-              <View style={styles.footerDivider} />
-              <Text style={styles.versionText}>v1.0.4 Premium</Text>
+            {/* Login Button */}
+            <TouchableOpacity
+              style={[styles.loginBtn, loading && styles.loginBtnDisabled]}
+              onPress={handleLogin}
+              disabled={loading}
+              activeOpacity={0.85}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" size="small" />
+              ) : (
+                <>
+                  <Text style={styles.loginBtnText}>SIGN IN</Text>
+                  <Ionicons name="arrow-forward" size={16} color="#fff" style={{ marginLeft: 8 }} />
+                </>
+              )}
+            </TouchableOpacity>
+          </View>
+
+          {/* Footer */}
+          <View style={styles.footer}>
+            <View style={styles.footerDividerRow}>
+              <View style={styles.footerLine} />
+              <Text style={styles.footerCenter}>AUTHORIZED PERSONNEL ONLY</Text>
+              <View style={styles.footerLine} />
             </View>
-          </ScrollView>
-        </View>
+            <Text style={styles.versionText}>v1.0.4 · Nizron Tech ERP</Text>
+          </View>
+        </ScrollView>
       </SafeAreaView>
-    </KeyboardAvoidingView >
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
+  root: {
     flex: 1,
-    backgroundColor: '#f8fafc',
+    backgroundColor: '#001529',
   },
-  backgroundGradient: {
+  bgLayer: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#001529',
+    // simulate gradient: dark navy to deep blue
+    // React Native doesn't support CSS linear-gradient natively without expo-linear-gradient
+    // We use a solid dark navy which is consistent with enterprise design
+  },
+  safe: {
     flex: 1,
-    backgroundColor: '#eff6ff', // Light blue foundation
+    backgroundColor: 'transparent',
   },
-  scrollContent: {
+  scroll: {
     flexGrow: 1,
-    padding: 24,
-    justifyContent: 'center',
-  },
-  headerSection: {
     alignItems: 'center',
-    marginBottom: 40,
-    marginTop: 40,
+    paddingHorizontal: 24,
+    paddingTop: 48,
+    paddingBottom: 32,
   },
-  logoContainer: {
-    width: 100,
-    height: 100,
-    backgroundColor: '#fff',
-    borderRadius: 24,
+
+  // Brand Section
+  brandSection: {
+    alignItems: 'center',
+    marginBottom: 32,
+  },
+  logoBox: {
+    width: 72,
+    height: 72,
+    borderRadius: 16,
+    backgroundColor: '#ffffff',
     justifyContent: 'center',
     alignItems: 'center',
-    marginBottom: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.1,
-    shadowRadius: 12,
-    elevation: 8,
+    marginBottom: 16,
     overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
   },
-  logoImage: {
+  logoImg: {
     width: '100%',
     height: '100%',
   },
-  logoText: {
-    color: '#fff',
-    fontSize: 24,
-    fontWeight: '900',
-    letterSpacing: 1,
-  },
-  welcomeTitle: {
-    fontSize: 28,
+  brandName: {
+    fontSize: 18,
     fontWeight: '800',
-    color: '#1e293b',
-    letterSpacing: -0.5,
+    color: '#ffffff',
+    letterSpacing: 2,
   },
-  welcomeSubtitle: {
-    fontSize: 16,
-    color: '#64748b',
+  brandTagline: {
+    fontSize: 12,
+    color: '#94a3b8',
     marginTop: 4,
     fontWeight: '500',
+    letterSpacing: 0.5,
   },
-  loginCard: {
-    backgroundColor: '#fff',
-    borderRadius: 32,
-    padding: 32,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.08,
-    shadowRadius: 30,
-    elevation: 4,
-  },
-  tabContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#f1f5f9',
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 24,
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: 'center',
-    borderRadius: 8,
-  },
-  activeTab: {
-    backgroundColor: '#fff',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  tabText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#64748b',
-  },
-  activeTabText: {
-    color: '#1e293b',
-  },
-  cardTitle: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: '#1e293b',
-    marginBottom: 8,
-  },
-  inputHint: {
-    fontSize: 14,
-    color: '#94a3b8',
-    marginBottom: 32,
-    lineHeight: 20,
-  },
-  inputGroup: {
-    marginBottom: 24,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: '#64748b',
-    marginBottom: 8,
-    letterSpacing: 1,
-  },
-  input: {
-    backgroundColor: '#f8fafc',
-    borderRadius: 16,
-    padding: 18,
-    color: '#1e293b',
-    fontSize: 16,
+
+  // Card
+  card: {
+    width: '100%',
+    maxWidth: 340,
+    backgroundColor: '#ffffff',
+    borderRadius: 6,
+    padding: 28,
     borderWidth: 1,
     borderColor: '#e2e8f0',
-    fontWeight: '500',
   },
-  loginButton: {
-    backgroundColor: '#1e293b',
-    borderRadius: 16,
-    padding: 20,
+
+  // Tab Switcher
+  tabRow: {
+    flexDirection: 'row',
+    backgroundColor: '#f1f5f9',
+    borderRadius: 6,
+    padding: 3,
+    marginBottom: 24,
+  },
+  tabPill: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 8,
-    shadowColor: '#1e293b',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
+    paddingVertical: 8,
+    borderRadius: 4,
   },
-  buttonDisabled: {
-    opacity: 0.7,
+  tabPillActive: {
+    backgroundColor: '#1677ff',
   },
-  loginButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '800',
-    letterSpacing: 1,
+  tabPillClientActive: {
+    backgroundColor: '#1677ff',
   },
-  forgotButton: {
-    alignItems: 'center',
-    marginTop: 24,
-  },
-  forgotText: {
-    color: '#2563eb',
-    fontSize: 14,
+  tabPillText: {
+    fontSize: 13,
     fontWeight: '600',
+    color: '#94a3b8',
   },
-  footerSection: {
-    alignItems: 'center',
-    marginTop: 40,
-    marginBottom: 20,
+  tabPillTextActive: {
+    color: '#ffffff',
   },
-  footerText: {
+
+  // Card text
+  cardTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#1e293b',
+    marginBottom: 4,
+  },
+  cardSub: {
     fontSize: 13,
     color: '#94a3b8',
-    fontWeight: '600',
+    marginBottom: 24,
+    lineHeight: 18,
   },
-  footerDivider: {
-    width: 40,
-    height: 2,
-    backgroundColor: '#e2e8f0',
-    marginVertical: 12,
+
+  // Fields
+  fieldGroup: {
+    marginBottom: 16,
+  },
+  fieldLabel: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#475569',
+    marginBottom: 6,
+    letterSpacing: 0.8,
+  },
+  inputWrap: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#f8fafc',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#e2e8f0',
+    height: 44,
+    paddingHorizontal: 12,
+  },
+  inputIcon: {
+    marginRight: 8,
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 14,
+    color: '#1e293b',
+    fontWeight: '500',
+    paddingVertical: 0,
+  },
+  eyeBtn: {
+    padding: 4,
+  },
+
+  // Login Button
+  loginBtn: {
+    height: 44,
+    backgroundColor: '#1677ff',
+    borderRadius: 6,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  loginBtnDisabled: {
+    opacity: 0.65,
+  },
+  loginBtnText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#ffffff',
+    letterSpacing: 1,
+  },
+
+  // Footer
+  footer: {
+    alignItems: 'center',
+    marginTop: 32,
+    width: '100%',
+  },
+  footerDividerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    width: '100%',
+    marginBottom: 10,
+  },
+  footerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  footerCenter: {
+    fontSize: 10,
+    color: '#475569',
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginHorizontal: 12,
   },
   versionText: {
     fontSize: 11,
-    color: '#cbd5e1',
-    fontWeight: '700',
+    color: '#334155',
+    fontWeight: '500',
   },
 });
